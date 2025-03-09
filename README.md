@@ -72,6 +72,9 @@ node ace serve --watch
 
 ## API Endpoints
 
+- base URL: `http://localhost:3333`
+- All endpoints are prefixed with `/api/v1` (e.g. `/api/v1/register`)
+
 ### Authentication
 
 - `POST /register` - Register a new user
