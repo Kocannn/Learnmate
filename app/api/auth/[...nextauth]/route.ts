@@ -58,18 +58,17 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async jwt({ token, user }) {
-      if (user) {
-        // Get onboarding status from database when creating the token
-        const userProfile = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: { hasCompletedOnboarding: true },
-        });
+      // Get onboarding status from database when creating the token
+      const userProfile = await prisma.user.findUnique({
+        where: { email: token.email },
+        select: { hasCompletedOnboarding: true },
+      });
 
-        token.user = {
-          ...((token.user as object) || {}),
-          hasCompletedOnboarding: userProfile?.hasCompletedOnboarding || false,
-        };
-      }
+      token.user = {
+        ...((token.user as object) || {}),
+        hasCompletedOnboarding: userProfile?.hasCompletedOnboarding || false,
+      };
+
       return token;
     },
   },

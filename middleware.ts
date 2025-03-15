@@ -1,6 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import prisma from "./lib/prisma";
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
@@ -11,6 +12,7 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
 
+  console.log(token);
   // If not logged in, redirect to login
   if (!token) {
     const loginUrl = new URL("/login", request.url);
@@ -18,7 +20,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  console.log(token);
   if (token?.user?.hasCompletedOnboarding === false) {
     const onboardingUrl = new URL("/onboarding", request.url);
     return NextResponse.redirect(onboardingUrl);
@@ -28,4 +29,5 @@ export async function middleware(request: NextRequest) {
 // See "Matching Paths" below to learn more
 export const config = {
   matcher: ["/dashboard/:path*"],
+  runtime: "nodejs",
 };
