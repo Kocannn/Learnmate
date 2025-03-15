@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,11 +14,33 @@ import {
 import { signIn } from "next-auth/react";
 
 export default function Page() {
+  const router = useRouter();
+  const [user, setUser] = useState({
+    email: "",
+    password: "",
+  });
+
   const handlerSignInWithGoogle = (e: React.FormEvent) => {
     e.preventDefault();
     signIn("google", {
       callbackUrl: "/",
     });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    const data = {
+      email: user.email,
+      password: user.password,
+    };
+    e.preventDefault();
+    const result = await signIn("credentials", {
+      ...data,
+      redirect: false,
+    });
+    if (result?.error) {
+      return;
+    }
+    router.push("/dashboard");
   };
 
   return (
@@ -33,15 +56,18 @@ export default function Page() {
           <CardContent className="space-y-4">
             <input
               type="email"
+              onChange={(e) => setUser({ ...user, email: e.target.value })}
               placeholder="Email address"
               className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             />
             <input
               type="password"
+              onChange={(e) => setUser({ ...user, password: e.target.value })}
               placeholder="Password"
               className="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             />
             <Button
+              onClick={handleSubmit}
               variant="default"
               className="w-full bg-blue-600 hover:bg-blue-700"
             >
