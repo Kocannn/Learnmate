@@ -8,6 +8,20 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       hasCompletedOnboarding?: boolean;
+      location?: string | null;
+      phone?: string | null;
+      bio?: string | null;
+      profileImage?: string | null;
+      joinDate?: string | null;
+      interests?: string[] | null;
+      completedSessions?: number;
+      totalHours?: number;
+      mentorCount?: number;
+      isMentor?: boolean;
+      expertise?: string[] | null;
+      rate?: number | null;
+      rating?: number | null;
+      reviewCount?: number;
     };
   }
 
@@ -17,5 +31,19 @@ declare module "next-auth" {
     email?: string | null;
     image?: string | null;
     hasCompletedOnboarding?: boolean;
+    location?: string | null;
+    phone?: string | null;
+    bio?: string | null;
+    profileImage?: string | null;
+    joinDate?: string | null;
+    interests?: string[] | null;
+    completedSessions?: number;
+    totalHours?: number;
+    mentorCount?: number;
+    isMentor?: boolean;
+    expertise?: string[] | null;
+    rate?: number | null;
+    rating?: number | null;
+    reviewCount?: number;
   }
 }
