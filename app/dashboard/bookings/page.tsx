@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { Calendar, ChevronRight, Clock, Video } from "lucide-react";
+import {
+  Calendar,
+  ChevronRight,
+  Clock,
+  Video,
+  User,
+  Clock4,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,173 +56,176 @@ export default function BookingsPage() {
       status: "completed",
       reviewed: true,
     },
-    {
-      id: 4,
-      mentor: "Dewi Lestari",
-      mentorId: 4,
-      topic: "Mobile App Development",
-      date: "3 Maret 2025",
-      time: "11:00 - 12:00",
-      status: "completed",
-      reviewed: false,
-    },
   ];
 
   return (
-    <div className="w-screen">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Jadwal Sesi</h1>
-          <p className="text-muted-foreground">
+    <div className="min-h-screen w-full p-8 bg-muted/40">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-primary mb-2">Jadwal Sesi</h1>
+          <p className="text-xl text-muted-foreground">
             Kelola sesi mentoring yang telah Anda jadwalkan
           </p>
         </div>
 
         <Tabs defaultValue="upcoming">
-          <TabsList>
-            <TabsTrigger value="upcoming">Mendatang</TabsTrigger>
-            <TabsTrigger value="past">Selesai</TabsTrigger>
+          <TabsList className="h-14 w-full bg-background">
+            <TabsTrigger
+              value="upcoming"
+              className="text-lg data-[state=active]:bg-primary data-[state=active]:text-white py-2 px-6"
+            >
+              📅 Mendatang
+            </TabsTrigger>
+            <TabsTrigger
+              value="past"
+              className="text-lg data-[state=active]:bg-primary data-[state=active]:text-white py-2 px-6"
+            >
+              ✅ Selesai
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="upcoming" className="mt-6 max-w-3xl mx-auto">
-            <div className="grid gap-6">
-              {upcomingBookings.length > 0 ? (
-                upcomingBookings.map((booking) => (
-                  <Card key={booking.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle>{booking.topic}</CardTitle>
-                          <CardDescription>
-                            dengan {booking.mentor}
-                          </CardDescription>
-                        </div>
-                        <div className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 rounded-full text-xs font-medium">
-                          Terkonfirmasi
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span className="text-sm">{booking.date}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span className="text-sm">{booking.time}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Video className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span className="text-sm">Zoom Meeting</span>
+          {/* Upcoming Sessions */}
+          <TabsContent value="upcoming" className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {upcomingBookings.map((booking) => (
+                <Card
+                  key={booking.id}
+                  className="shadow-lg hover:shadow-xl transition-all"
+                >
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-4">
+                        <CardTitle className="text-2xl">
+                          {booking.topic}
+                        </CardTitle>
+                        <div className="flex items-center gap-2">
+                          <User className="h-5 w-5 text-primary" />
+                          <span className="text-lg font-semibold">
+                            {booking.mentor}
+                          </span>
                         </div>
                       </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col sm:flex-row gap-3 sm:justify-between">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/dashboard/mentors/${booking.mentorId}`}>
-                          Lihat Profil Mentor
-                        </Link>
-                      </Button>
-                      <div className="flex gap-3">
-                        <Button variant="outline" size="sm">
-                          Reschedule
-                        </Button>
-                        <Button size="sm" asChild>
-                          <a
-                            href={booking.zoomLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Join Zoom
-                          </a>
-                        </Button>
-                      </div>
-                    </CardFooter>
-                  </Card>
-                ))
-              ) : (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center p-6">
-                    <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="font-medium text-lg">
-                      Tidak Ada Sesi Mendatang
-                    </h3>
-                    <p className="text-muted-foreground text-center mt-2">
-                      Anda belum memiliki sesi mentoring yang dijadwalkan.
-                    </p>
-                    <Button className="mt-4" asChild>
-                      <Link href="/dashboard/search">
-                        Cari Mentor
-                        <ChevronRight className="ml-2 h-4 w-4" />
+                      <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-base font-medium">
+                        Terkonfirmasi
+                      </span>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="h-6 w-6 text-primary" />
+                      <span className="text-lg">{booking.date}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Clock className="h-6 w-6 text-primary" />
+                      <span className="text-lg">{booking.time}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Video className="h-6 w-6 text-primary" />
+                      <a
+                        href={booking.zoomLink}
+                        className="text-lg text-primary hover:underline"
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        Link Zoom Meeting
+                      </a>
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="flex flex-col sm:flex-row gap-4 border-t pt-6">
+                    <Button
+                      variant="outline"
+                      className="w-full h-12 text-lg"
+                      asChild
+                    >
+                      <Link href={`/dashboard/mentors/${booking.mentorId}`}>
+                        👤 Profil Mentor
                       </Link>
                     </Button>
-                  </CardContent>
+                    <Button
+                      variant="outline"
+                      className="w-full h-12 text-lg text-blue-600"
+                    >
+                      🕒 Reschedule
+                    </Button>
+                    <Button
+                      className="w-full h-12 text-lg bg-primary hover:bg-primary/90"
+                      asChild
+                    >
+                      <a href={booking.zoomLink} target="_blank" rel="noopener">
+                        🚀 Join Zoom
+                      </a>
+                    </Button>
+                  </CardFooter>
                 </Card>
-              )}
+              ))}
             </div>
           </TabsContent>
 
-          <TabsContent value="past" className="mt-6 max-w-3xl mx-auto">
-            <div className="grid gap-6">
-              {pastBookings.length > 0 ? (
-                pastBookings.map((booking) => (
-                  <Card key={booking.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle>{booking.topic}</CardTitle>
-                          <CardDescription>
-                            dengan {booking.mentor}
-                          </CardDescription>
-                        </div>
-                        <div className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 rounded-full text-xs font-medium">
-                          Selesai
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span className="text-sm">{booking.date}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <span className="text-sm">{booking.time}</span>
+          {/* Past Sessions */}
+          <TabsContent value="past" className="mt-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {pastBookings.map((booking) => (
+                <Card key={booking.id} className="shadow-lg bg-muted/50">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-2xl mb-2">
+                          {booking.topic}
+                        </CardTitle>
+                        <div className="flex items-center gap-2 mb-4">
+                          <User className="h-5 w-5 text-primary" />
+                          <span className="text-lg font-semibold">
+                            {booking.mentor}
+                          </span>
                         </div>
                       </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col sm:flex-row gap-3 sm:justify-between">
-                      <Button variant="outline" size="sm" asChild>
+                      <span className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full text-base font-medium">
+                        Selesai
+                      </span>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="h-6 w-6 text-primary" />
+                      <span className="text-lg">{booking.date}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Clock className="h-6 w-6 text-primary" />
+                      <span className="text-lg">{booking.time}</span>
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="border-t pt-6">
+                    <div className="flex w-full gap-4">
+                      <Button
+                        variant="outline"
+                        className="flex-1 h-12 text-lg"
+                        asChild
+                      >
                         <Link href={`/dashboard/mentors/${booking.mentorId}`}>
-                          Lihat Profil Mentor
+                          👤 Profil Mentor
                         </Link>
                       </Button>
-                      {!booking.reviewed && (
-                        <Button size="sm">Berikan Ulasan</Button>
-                      )}
-                      {booking.reviewed && (
-                        <Button variant="outline" size="sm" disabled>
-                          Ulasan Terkirim
+                      {!booking.reviewed ? (
+                        <Button className="flex-1 h-12 text-lg bg-primary hover:bg-primary/90">
+                          ✍️ Beri Ulasan
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          className="flex-1 h-12 text-lg"
+                          disabled
+                        >
+                          📩 Ulasan Terkirim
                         </Button>
                       )}
-                    </CardFooter>
-                  </Card>
-                ))
-              ) : (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center p-6">
-                    <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="font-medium text-lg">
-                      Tidak Ada Sesi Selesai
-                    </h3>
-                    <p className="text-muted-foreground text-center mt-2">
-                      Anda belum memiliki sesi mentoring yang telah selesai.
-                    </p>
-                  </CardContent>
+                    </div>
+                  </CardFooter>
                 </Card>
-              )}
+              ))}
             </div>
           </TabsContent>
         </Tabs>
