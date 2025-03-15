@@ -1,10 +1,31 @@
-import Link from "next/link"
-import { ArrowRight, BookOpen, Calendar, Star, Users } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+"use client";
+import Link from "next/link";
+import { ArrowRight, BookOpen, Calendar, Star, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  useEffect(() => {
+    if (session?.user) {
+      router.push("/dashboard");
+    }
+
+    if (session?.user) {
+      router.push("/dashboard");
+    }
+  }, [session]);
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero Section */}
@@ -14,11 +35,14 @@ export default function LandingPage() {
             <div className="flex-1 space-y-6">
               <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
                 Belajar dari Mentor Ahli,{" "}
-                <span className="text-indigo-600 dark:text-indigo-400">Raih Karier Impianmu</span>
+                <span className="text-indigo-600 dark:text-indigo-400">
+                  Raih Karier Impianmu
+                </span>
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-300">
-                Platform mentoring yang menghubungkan pelajar, mahasiswa, dan profesional dengan mentor ahli untuk
-                pembelajaran keterampilan baru.
+                Platform mentoring yang menghubungkan pelajar, mahasiswa, dan
+                profesional dengan mentor ahli untuk pembelajaran keterampilan
+                baru.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700">
@@ -45,7 +69,9 @@ export default function LandingPage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Fitur Utama Platform</h2>
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
+              Fitur Utama Platform
+            </h2>
             <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">
               Semua yang kamu butuhkan untuk meningkatkan keterampilan baru
             </p>
@@ -59,7 +85,8 @@ export default function LandingPage() {
                 </div>
                 <CardTitle>Rekomendasi AI</CardTitle>
                 <CardDescription>
-                  Temukan mentor yang paling sesuai dengan kebutuhanmu melalui sistem rekomendasi AI
+                  Temukan mentor yang paling sesuai dengan kebutuhanmu melalui
+                  sistem rekomendasi AI
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -70,7 +97,10 @@ export default function LandingPage() {
                   <Calendar className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <CardTitle>Booking Sesi</CardTitle>
-                <CardDescription>Jadwalkan sesi mentoring dengan mudah sesuai waktu yang kamu inginkan</CardDescription>
+                <CardDescription>
+                  Jadwalkan sesi mentoring dengan mudah sesuai waktu yang kamu
+                  inginkan
+                </CardDescription>
               </CardHeader>
             </Card>
 
@@ -81,7 +111,8 @@ export default function LandingPage() {
                 </div>
                 <CardTitle>Pembelajaran Terstruktur</CardTitle>
                 <CardDescription>
-                  Dapatkan arahan yang jelas dan dukungan berkelanjutan dari mentor ahli
+                  Dapatkan arahan yang jelas dan dukungan berkelanjutan dari
+                  mentor ahli
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -93,7 +124,9 @@ export default function LandingPage() {
       <section className="bg-slate-50 dark:bg-slate-900 py-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Testimoni Pengguna</h2>
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
+              Testimoni Pengguna
+            </h2>
             <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">
               Apa kata mereka yang telah menggunakan platform kami
             </p>
@@ -113,7 +146,10 @@ export default function LandingPage() {
                       <CardTitle className="text-base">Pengguna {i}</CardTitle>
                       <div className="flex mt-1">
                         {[...Array(5)].map((_, j) => (
-                          <Star key={j} className="h-4 w-4 fill-current text-yellow-500" />
+                          <Star
+                            key={j}
+                            className="h-4 w-4 fill-current text-yellow-500"
+                          />
                         ))}
                       </div>
                     </div>
@@ -121,8 +157,9 @@ export default function LandingPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-slate-600 dark:text-slate-300">
-                    "Platform ini sangat membantu saya dalam mempelajari keterampilan baru. Mentor yang saya dapatkan
-                    sangat profesional dan memberikan arahan yang jelas."
+                    "Platform ini sangat membantu saya dalam mempelajari
+                    keterampilan baru. Mentor yang saya dapatkan sangat
+                    profesional dan memberikan arahan yang jelas."
                   </p>
                 </CardContent>
               </Card>
@@ -136,12 +173,18 @@ export default function LandingPage() {
         <div className="container mx-auto max-w-6xl">
           <div className="bg-indigo-600 dark:bg-indigo-700 rounded-2xl p-8 md:p-12 shadow-xl">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-white">Siap Untuk Memulai?</h2>
+              <h2 className="text-3xl font-bold text-white">
+                Siap Untuk Memulai?
+              </h2>
               <p className="mt-4 text-lg text-indigo-100">
-                Bergabunglah dengan ribuan pengguna yang telah meningkatkan keterampilan mereka
+                Bergabunglah dengan ribuan pengguna yang telah meningkatkan
+                keterampilan mereka
               </p>
-              <Button size="lg" className="mt-8 bg-white text-indigo-600 hover:bg-indigo-50">
-                Daftar Sekarang
+              <Button
+                size="lg"
+                className="mt-8 bg-white text-indigo-600 hover:bg-indigo-50"
+              >
+                <Link href="/register">Daftar Sekarang</Link>
               </Button>
             </div>
           </div>
@@ -153,8 +196,13 @@ export default function LandingPage() {
         <div className="container mx-auto max-w-6xl">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold text-white mb-4">Mentor Platform</h3>
-              <p className="text-slate-400">Platform mentoring yang menghubungkan pelajar dengan mentor ahli.</p>
+              <h3 className="text-xl font-bold text-white mb-4">
+                Mentor Platform
+              </h3>
+              <p className="text-slate-400">
+                Platform mentoring yang menghubungkan pelajar dengan mentor
+                ahli.
+              </p>
             </div>
             <div>
               <h4 className="text-lg font-semibold text-white mb-4">Fitur</h4>
@@ -177,7 +225,9 @@ export default function LandingPage() {
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Perusahaan</h4>
+              <h4 className="text-lg font-semibold text-white mb-4">
+                Perusahaan
+              </h4>
               <ul className="space-y-2">
                 <li>
                   <Link href="#" className="hover:text-indigo-400">
@@ -223,6 +273,5 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
-
