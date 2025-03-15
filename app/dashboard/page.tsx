@@ -1,8 +1,24 @@
-import Link from "next/link"
-import { ArrowRight, Calendar, ChevronRight, Clock, Star, Users } from "lucide-react"
+"use client";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Calendar,
+  ChevronRight,
+  Clock,
+  Star,
+  Users,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useSession } from "next-auth/react";
 
 export default function DashboardPage() {
   // Sample data for recommended mentors
@@ -31,7 +47,7 @@ export default function DashboardPage() {
       image: "/placeholder.svg?height=80&width=80",
       bio: "Data Scientist dengan keahlian di machine learning dan analisis data.",
     },
-  ]
+  ];
 
   // Sample data for upcoming sessions
   const upcomingSessions = [
@@ -49,13 +65,15 @@ export default function DashboardPage() {
       time: "10:00 - 11:00",
       topic: "UI Design Principles",
     },
-  ]
+  ];
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Selamat datang kembali! Berikut adalah ringkasan aktivitas Anda.</p>
+        <p className="text-muted-foreground">
+          Selamat datang kembali! Berikut adalah ringkasan aktivitas Anda.
+        </p>
       </div>
 
       {/* Stats Overview */}
@@ -92,7 +110,9 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rating Diberikan</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Rating Diberikan
+            </CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -128,19 +148,25 @@ export default function DashboardPage() {
                   />
                   <h3 className="mt-2 font-semibold text-lg">{mentor.name}</h3>
                   <div className="flex items-center gap-1 mt-1">
-                    <span className="text-sm text-muted-foreground">{mentor.category}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {mentor.category}
+                    </span>
                     <span className="text-xs">•</span>
                     <div className="flex items-center">
                       <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
                       <span className="text-sm ml-1">{mentor.rating}</span>
                     </div>
                   </div>
-                  <p className="text-sm text-center text-muted-foreground mt-3">{mentor.bio}</p>
+                  <p className="text-sm text-center text-muted-foreground mt-3">
+                    {mentor.bio}
+                  </p>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-center border-t p-4">
                 <Button asChild>
-                  <Link href={`/dashboard/mentors/${mentor.id}`}>Lihat Profil</Link>
+                  <Link href={`/dashboard/mentors/${mentor.id}`}>
+                    Lihat Profil
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -190,7 +216,9 @@ export default function DashboardPage() {
             <Card className="col-span-2">
               <CardContent className="flex flex-col items-center justify-center p-6">
                 <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-medium text-lg">Tidak Ada Sesi Mendatang</h3>
+                <h3 className="font-medium text-lg">
+                  Tidak Ada Sesi Mendatang
+                </h3>
                 <p className="text-muted-foreground text-center mt-2">
                   Anda belum memiliki sesi mentoring yang dijadwalkan.
                 </p>
@@ -206,6 +234,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

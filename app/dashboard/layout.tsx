@@ -1,11 +1,23 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { usePathname } from "next/navigation";
+import {
+  BookOpen,
+  Calendar,
+  Clock,
+  CreditCard,
+  Home,
+  LogOut,
+  Search,
+  Settings,
+  Star,
+  User,
+} from "lucide-react";
 
-import { usePathname } from "next/navigation"
-import { BookOpen, Calendar, Clock, CreditCard, Home, LogOut, Search, Settings, Star, User } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -20,18 +32,18 @@ import {
   SidebarProvider,
   SidebarSeparator,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
+      <div className="flex w-screen">
         <AppSidebar pathname={pathname} />
         <main className="flex-1 bg-slate-50 dark:bg-slate-900">
           <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-slate-950 dark:border-slate-800">
@@ -41,17 +53,20 @@ export default function DashboardLayout({
                 <Bell className="h-4 w-4 mr-2" />
                 <span className="sr-only sm:not-sr-only">Notifikasi</span>
               </Button>
+
               <Button variant="ghost" size="sm">
                 <User className="h-4 w-4 mr-2" />
-                <span className="sr-only sm:not-sr-only">Profil</span>
+                <Link href="/dashboard/profile">
+                  <span className="sr-only sm:not-sr-only">Profil</span>
+                </Link>
               </Button>
             </div>
           </div>
-          <div className="p-6">{children}</div>
+          <div className="p-6 min-h-screen">{children}</div>
         </main>
       </div>
     </SidebarProvider>
-  )
+  );
 }
 
 function AppSidebar({ pathname }: { pathname: string }) {
@@ -80,7 +95,10 @@ function AppSidebar({ pathname }: { pathname: string }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === "/dashboard/search"}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/dashboard/search"}
+                >
                   <a href="/dashboard/search">
                     <Search />
                     <span>Cari Mentor</span>
@@ -88,7 +106,10 @@ function AppSidebar({ pathname }: { pathname: string }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === "/dashboard/bookings"}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/dashboard/bookings"}
+                >
                   <a href="/dashboard/bookings">
                     <Calendar />
                     <span>Jadwal Sesi</span>
@@ -96,7 +117,10 @@ function AppSidebar({ pathname }: { pathname: string }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === "/dashboard/history"}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/dashboard/history"}
+                >
                   <a href="/dashboard/history">
                     <Clock />
                     <span>Riwayat Sesi</span>
@@ -112,7 +136,10 @@ function AppSidebar({ pathname }: { pathname: string }) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === "/dashboard/progress"}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/dashboard/progress"}
+                >
                   <a href="/dashboard/progress">
                     <BookOpen />
                     <span>Progress Belajar</span>
@@ -120,7 +147,10 @@ function AppSidebar({ pathname }: { pathname: string }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === "/dashboard/reviews"}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/dashboard/reviews"}
+                >
                   <a href="/dashboard/reviews">
                     <Star />
                     <span>Review Mentor</span>
@@ -136,7 +166,10 @@ function AppSidebar({ pathname }: { pathname: string }) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === "/dashboard/payments"}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/dashboard/payments"}
+                >
                   <a href="/dashboard/payments">
                     <CreditCard />
                     <span>Pembayaran</span>
@@ -144,7 +177,10 @@ function AppSidebar({ pathname }: { pathname: string }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === "/dashboard/settings"}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/dashboard/settings"}
+                >
                   <a href="/dashboard/settings">
                     <Settings />
                     <span>Pengaturan</span>
@@ -158,7 +194,7 @@ function AppSidebar({ pathname }: { pathname: string }) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
+            <SidebarMenuButton onClick={() => redirect("/api/auth/signout")}>
               <LogOut />
               <span>Keluar</span>
             </SidebarMenuButton>
@@ -166,7 +202,7 @@ function AppSidebar({ pathname }: { pathname: string }) {
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
 
 function Bell(props: React.SVGProps<SVGSVGElement>) {
@@ -186,6 +222,5 @@ function Bell(props: React.SVGProps<SVGSVGElement>) {
       <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
       <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
     </svg>
-  )
+  );
 }
-
