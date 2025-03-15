@@ -65,14 +65,72 @@ model User {
   name             String?
   email            String?            @unique
   emailVerified    DateTime?
+  phone            String?
   image            String?
+  location         String?
+  hasCompletedOnboarding Boolean?    @default(false)
+  bio              String?            @db.Text
+  profileImage     String?
+  joinDate         DateTime           @default(now())
   password         String?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   accounts         Account[]
   sessions         Session[]
+  interests        String[]
+  completedSessions Int               @default(0)
+  totalHours       Float              @default(0)
+  mentorCount      Int                @default(0)
+  
+  // Mentor specific fields
+  isMentor         Boolean            @default(false)
+  expertise        String[]
+  rate             Float?
+  rating           Float?
+  reviewCount      Int                @default(0)
+  
+  // Relations
+  education        Education[]
+  experience       Experience[]
+  availability     Availability[]
 
   @@map("users")
 }
 
+model Education {
+  id           String    @id @default(cuid())
+  institution  String
+  degree       String
+  year         String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
+  @@map("education")
+}
+
+model Experience {
+  id           String    @id @default(cuid())
+  company      String
+  position     String
+  duration     String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("experience")
+}
+
+model Availability {
+  id           String    @id @default(cuid())
+  day          String
+  slots        String[]
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("availability")
+}
