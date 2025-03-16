@@ -46,12 +46,37 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async session({ session, token }) {
-      // Copy all user data from token to session
-      if (session.user && token.user) {
-        session.user = {
-          ...session.user,
-          ...token.user,
-        };
+      if (session.user) {
+        // Ambil data terbaru dari database berdasarkan email pengguna
+        const updatedUser = await prisma.user.findUnique({
+          where: { email: session.user.email },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            phone: true,
+            location: true,
+            hasCompletedOnboarding: true,
+            bio: true,
+            profileImage: true,
+            joinDate: true,
+            interests: true,
+            completedSessions: true,
+            totalHours: true,
+            mentorCount: true,
+            isMentor: true,
+            expertise: true,
+            rate: true,
+            rating: true,
+            reviewCount: true,
+          },
+        });
+
+        if (updatedUser) {
+          session.user = updatedUser; // Perbarui session dengan data terbaru
+        }
+        console.log("session.user", session.user);
       }
       return session;
     },
