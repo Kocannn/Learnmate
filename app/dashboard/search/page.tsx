@@ -1,87 +1,83 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Filter, Search, Star } from "lucide-react"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Filter, Search, Star } from "lucide-react";
+import { PrismaClient } from "@prisma/client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 
+// Interface for our mentor data structure
+interface Mentor {
+  id: string;
+  name: string;
+  interests: string[];
+  rating: number;
+  rate: number | null;
+  profileImage: string | null;
+  bio: string | null;
+  reviewCount: number;
+}
+
+// Fetch all mentors function
+async function getMentors() {
+  const res = await fetch("/api/v1/mentors");
+  if (!res.ok) {
+    throw new Error("Failed to fetch mentors");
+  }
+  return res.json();
+}
 export default function SearchPage() {
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Sample data for mentors
-  const mentors = [
-    {
-      id: 1,
-      name: "Budi Santoso",
-      category: "Programming",
-      subcategory: "Web Development",
-      rating: 4.9,
-      price: 350000,
-      image: "/placeholder.svg?height=80&width=80",
-      bio: "Senior Software Engineer dengan 10 tahun pengalaman di berbagai teknologi web dan mobile.",
-    },
-    {
-      id: 2,
-      name: "Siti Rahayu",
-      category: "UI/UX Design",
-      subcategory: "Product Design",
-      rating: 4.8,
-      price: 400000,
-      image: "/placeholder.svg?height=80&width=80",
-      bio: "UI/UX Designer dengan pengalaman di perusahaan teknologi terkemuka.",
-    },
-    {
-      id: 3,
-      name: "Ahmad Hidayat",
-      category: "Data Science",
-      subcategory: "Machine Learning",
-      rating: 4.7,
-      price: 450000,
-      image: "/placeholder.svg?height=80&width=80",
-      bio: "Data Scientist dengan keahlian di machine learning dan analisis data.",
-    },
-    {
-      id: 4,
-      name: "Dewi Lestari",
-      category: "Programming",
-      subcategory: "Mobile Development",
-      rating: 4.6,
-      price: 375000,
-      image: "/placeholder.svg?height=80&width=80",
-      bio: "Mobile Developer dengan fokus pada pengembangan aplikasi Android dan iOS.",
-    },
-    {
-      id: 5,
-      name: "Rudi Hartono",
-      category: "Business",
-      subcategory: "Marketing",
-      rating: 4.8,
-      price: 500000,
-      image: "/placeholder.svg?height=80&width=80",
-      bio: "Marketing Specialist dengan pengalaman di berbagai industri.",
-    },
-    {
-      id: 6,
-      name: "Rina Wijaya",
-      category: "Business",
-      subcategory: "Entrepreneurship",
-      rating: 4.9,
-      price: 550000,
-      image: "/placeholder.svg?height=80&width=80",
-      bio: "Entrepreneur sukses dengan pengalaman membangun beberapa startup.",
-    },
-  ]
+  useEffect(() => {
+    async function loadMentors() {
+      try {
+        const data = await getMentors();
+        setMentors(data);
+      } catch (error) {
+        console.error("Error loading mentors:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadMentors();
+  }, []);
+
+  // Filter mentors based on search query
+  const filteredMentors = mentors.filter(
+    (mentor) =>
+      mentor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      mentor.interests.some((interest) =>
+        interest.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+  );
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Cari Mentor</h1>
-        <p className="text-muted-foreground">Temukan mentor yang sesuai dengan kebutuhan belajar Anda</p>
+        <p className="text-muted-foreground">
+          Temukan mentor yang sesuai dengan kebutuhan belajar Anda
+        </p>
       </div>
 
       {/* Search and Filter */}
@@ -147,44 +143,66 @@ export default function SearchPage() {
 
       {/* Mentor List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mentors.map((mentor) => (
-          <Card key={mentor.id} className="overflow-hidden">
-            <CardHeader className="p-0">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-12" />
-            </CardHeader>
-            <CardContent className="p-6 pt-0">
-              <div className="flex flex-col items-center -mt-8">
-                <img
-                  src={mentor.image || "/placeholder.svg"}
-                  alt={mentor.name}
-                  className="rounded-full border-4 border-white dark:border-slate-800 h-16 w-16 bg-white"
-                />
-                <h3 className="mt-2 font-semibold text-lg">{mentor.name}</h3>
-                <div className="flex items-center gap-1 mt-1">
-                  <span className="text-sm text-muted-foreground">{mentor.category}</span>
-                  <span className="text-xs">•</span>
-                  <span className="text-sm text-muted-foreground">{mentor.subcategory}</span>
+        {loading ? (
+          <p>Memuat data mentor...</p>
+        ) : filteredMentors.length === 0 ? (
+          <p>Tidak ada mentor yang sesuai dengan pencarian Anda</p>
+        ) : (
+          filteredMentors.map((mentor) => (
+            <Card key={mentor.id} className="overflow-hidden">
+              <CardHeader className="p-0">
+                <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-12" />
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <div className="flex flex-col items-center -mt-8">
+                  <img
+                    src={mentor.profileImage || "/placeholder.svg"}
+                    alt={mentor.name}
+                    className="rounded-full border-4 border-white dark:border-slate-800 h-16 w-16 bg-white"
+                  />
+                  <h3 className="mt-2 font-semibold text-lg">{mentor.name}</h3>
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="text-sm text-muted-foreground">
+                      {mentor.interests[0]}
+                    </span>
+                    {mentor.interests[1] && (
+                      <>
+                        <span className="text-xs">•</span>
+                        <span className="text-sm text-muted-foreground">
+                          {mentor.interests[1]}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex items-center mt-1">
+                    <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                    <span className="text-sm ml-1">{mentor.rating}</span>
+                  </div>
+                  <p className="text-sm text-center text-muted-foreground mt-3">
+                    {mentor.bio}
+                  </p>
+                  <div className="mt-4 text-center">
+                    <span className="font-medium">
+                      Rp {mentor.rate?.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {" "}
+                      / sesi
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center mt-1">
-                  <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                  <span className="text-sm ml-1">{mentor.rating}</span>
-                </div>
-                <p className="text-sm text-center text-muted-foreground mt-3">{mentor.bio}</p>
-                <div className="mt-4 text-center">
-                  <span className="font-medium">Rp {mentor.price.toLocaleString()}</span>
-                  <span className="text-sm text-muted-foreground"> / sesi</span>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-center border-t p-4">
-              <Button asChild>
-                <Link href={`/dashboard/mentors/${mentor.id}`}>Lihat Profil</Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+              </CardContent>
+              <CardFooter className="flex justify-center border-t p-4">
+                <Button asChild>
+                  <Link href={`/dashboard/mentors/${mentor.id}`}>
+                    Lihat Profil
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          ))
+        )}
       </div>
     </div>
-  )
+  );
 }
-

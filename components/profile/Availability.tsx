@@ -31,6 +31,11 @@ export default function AvailabilityTab({
   editMode,
   setShowAddExperience,
 }: AvailabilityTabProps) {
+  // Make sure userData.availability is an array
+  const availability = Array.isArray(userData.availability)
+    ? userData.availability
+    : [];
+
   return (
     <div className="mt-4 space-y-6">
       <Card>
