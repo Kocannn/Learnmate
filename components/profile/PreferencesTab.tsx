@@ -18,9 +18,13 @@ import { Separator } from "@/components/ui/separator";
 
 interface PreferencesTabProps {
   userData: any;
+  isMentor?: boolean;
 }
 
-export default function PreferencesTab({ userData }: PreferencesTabProps) {
+export default function PreferencesTab({
+  userData,
+  isMentor,
+}: PreferencesTabProps) {
   return (
     <div className="mt-4 space-y-6">
       <Card>
@@ -78,7 +82,6 @@ export default function PreferencesTab({ userData }: PreferencesTabProps) {
               </SelectContent>
             </Select>
           </div>
-
           <div>
             <Label>Tujuan Pembelajaran</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
@@ -129,60 +132,62 @@ export default function PreferencesTab({ userData }: PreferencesTabProps) {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Preferensi Mentor</CardTitle>
-          <CardDescription>
-            Atur preferensi untuk jenis mentor yang Anda inginkan
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="experience-level">Tingkat Pengalaman</Label>
-            <Select defaultValue="mid">
-              <SelectTrigger id="experience-level" className="mt-1">
-                <SelectValue placeholder="Pilih tingkat pengalaman" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="entry">Entry Level (1-3 tahun)</SelectItem>
-                <SelectItem value="mid">Mid Level (3-5 tahun)</SelectItem>
-                <SelectItem value="senior">Senior (5+ tahun)</SelectItem>
-                <SelectItem value="any">Tidak ada preferensi</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="communication-style">Gaya Komunikasi</Label>
-            <Select defaultValue="structured">
-              <SelectTrigger id="communication-style" className="mt-1">
-                <SelectValue placeholder="Pilih gaya komunikasi" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="direct">Langsung dan Tegas</SelectItem>
-                <SelectItem value="supportive">
-                  Suportif dan Memotivasi
-                </SelectItem>
-                <SelectItem value="structured">
-                  Terstruktur dan Sistematis
-                </SelectItem>
-                <SelectItem value="any">Tidak ada preferensi</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="ai-recommendations">Rekomendasi AI</Label>
-              <p className="text-sm text-muted-foreground">
-                Aktifkan rekomendasi mentor berbasis AI berdasarkan preferensi
-                Anda
-              </p>
+      {isMentor && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Preferensi Mentor</CardTitle>
+            <CardDescription>
+              Atur preferensi untuk jenis mentor yang Anda inginkan
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="experience-level">Tingkat Pengalaman</Label>
+              <Select defaultValue="mid">
+                <SelectTrigger id="experience-level" className="mt-1">
+                  <SelectValue placeholder="Pilih tingkat pengalaman" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="entry">Entry Level (1-3 tahun)</SelectItem>
+                  <SelectItem value="mid">Mid Level (3-5 tahun)</SelectItem>
+                  <SelectItem value="senior">Senior (5+ tahun)</SelectItem>
+                  <SelectItem value="any">Tidak ada preferensi</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Switch id="ai-recommendations" defaultChecked />
-          </div>
-        </CardContent>
-      </Card>
+
+            <div>
+              <Label htmlFor="communication-style">Gaya Komunikasi</Label>
+              <Select defaultValue="structured">
+                <SelectTrigger id="communication-style" className="mt-1">
+                  <SelectValue placeholder="Pilih gaya komunikasi" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="direct">Langsung dan Tegas</SelectItem>
+                  <SelectItem value="supportive">
+                    Suportif dan Memotivasi
+                  </SelectItem>
+                  <SelectItem value="structured">
+                    Terstruktur dan Sistematis
+                  </SelectItem>
+                  <SelectItem value="any">Tidak ada preferensi</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="ai-recommendations">Rekomendasi AI</Label>
+                <p className="text-sm text-muted-foreground">
+                  Aktifkan rekomendasi mentor berbasis AI berdasarkan preferensi
+                  Anda
+                </p>
+              </div>
+              <Switch id="ai-recommendations" defaultChecked />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

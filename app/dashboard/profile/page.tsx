@@ -9,8 +9,6 @@ import AddExperienceDialog from "@/components/profile/AddExperienceDialog";
 import { useEffect, useState } from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 
 import { useSession } from "next-auth/react";
 import { formatDate } from "@/lib/utils";
@@ -51,6 +49,7 @@ export default function ProfilePage() {
         rating: session.user.rating,
         reviewCount: session.user.reviewCount,
       });
+      setUserType(session.user.isMentor ? "mentor" : "mentee");
     }
   }, [session]);
 
@@ -103,23 +102,6 @@ export default function ProfilePage() {
         <p className="text-muted-foreground">
           Kelola informasi profil dan pengaturan akun Anda
         </p>
-      </div>
-
-      <div className="flex justify-end">
-        <RadioGroup
-          defaultValue={userType}
-          className="flex"
-          onValueChange={(value) => setUserType(value as "mentee" | "mentor")}
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="mentee" id="mentee" />
-            <Label htmlFor="mentee">Tampilan Mentee</Label>
-          </div>
-          <div className="flex items-center space-x-2 ml-4">
-            <RadioGroupItem value="mentor" id="mentor" />
-            <Label htmlFor="mentor">Tampilan Mentor</Label>
-          </div>
-        </RadioGroup>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -178,7 +160,7 @@ export default function ProfilePage() {
             {/* Preferences Tab (Mentee Only) */}
             {userType === "mentee" && (
               <TabsContent value="preferences">
-                <PreferencesTab userData={userData} />
+                <PreferencesTab userData={userData} isMentor={user?.isMentor} />
               </TabsContent>
             )}
           </Tabs>
