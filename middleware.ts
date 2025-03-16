@@ -12,7 +12,6 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  console.log(token);
   // If not logged in, redirect to login
   if (!token) {
     const loginUrl = new URL("/login", request.url);
