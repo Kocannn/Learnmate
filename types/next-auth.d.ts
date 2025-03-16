@@ -4,13 +4,13 @@ declare module "next-auth" {
   interface Session {
     user: {
       id?: string;
-      name?: string | null;
+      name?: string;
       email?: string | null;
       image?: string | null;
       hasCompletedOnboarding?: boolean;
-      location?: string | null;
+      location?: string;
       phone?: string | null;
-      bio?: string | null;
+      bio?: string;
       profileImage?: string | null;
       joinDate?: string | null;
       interests?: string[] | null;
@@ -19,7 +19,7 @@ declare module "next-auth" {
       mentorCount?: number;
       isMentor?: boolean;
       expertise?: string[] | null;
-      rate?: number | null;
+      rate?: number;
       rating?: number | null;
       reviewCount?: number;
     };
@@ -27,13 +27,13 @@ declare module "next-auth" {
 
   interface User {
     id?: string;
-    name?: string | null;
+    name?: string;
     email?: string | null;
     image?: string | null;
     hasCompletedOnboarding?: boolean;
-    location?: string | null;
+    location?: string;
     phone?: string | null;
-    bio?: string | null;
+    bio?: string;
     profileImage?: string | null;
     joinDate?: string | null;
     interests?: string[] | null;
@@ -42,7 +42,7 @@ declare module "next-auth" {
     mentorCount?: number;
     isMentor?: boolean;
     expertise?: string[] | null;
-    rate?: number | null;
+    rate?: number;
     rating?: number | null;
     reviewCount?: number;
   }
