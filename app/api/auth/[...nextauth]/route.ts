@@ -45,30 +45,49 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async session({ session }) {
-      if (session.user) {
-        const userProfile = await prisma.user.findUnique({
-          where: { email: session.user.email! },
-          select: { hasCompletedOnboarding: true },
-        });
-
-        session.user.hasCompletedOnboarding =
-          userProfile?.hasCompletedOnboarding || false;
+    async session({ session, token }) {
+      // Copy all user data from token to session
+      if (session.user && token.user) {
+        session.user = {
+          ...session.user,
+          ...token.user,
+        };
       }
       return session;
     },
+
     async jwt({ token, user }) {
-      // Get onboarding status from database when creating the token
-      const userProfile = await prisma.user.findUnique({
-        where: { email: token.email },
-        select: { hasCompletedOnboarding: true },
-      });
+      if (user) {
+        // When user signs in, fetch complete user profile from database
+        const userProfile = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            phone: true,
+            location: true,
+            hasCompletedOnboarding: true,
+            bio: true,
+            profileImage: true,
+            joinDate: true,
+            interests: true,
+            completedSessions: true,
+            totalHours: true,
+            mentorCount: true,
+            isMentor: true,
+            expertise: true,
+            rate: true,
+            rating: true,
+            reviewCount: true,
+            // Exclude password and other sensitive fields
+          },
+        });
 
-      token.user = {
-        ...((token.user as object) || {}),
-        hasCompletedOnboarding: userProfile?.hasCompletedOnboarding || false,
-      };
-
+        // Store complete user profile in token
+        token.user = userProfile;
+      }
       return token;
     },
   },
