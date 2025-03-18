@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import {
   BookOpen,
   Calendar,
-  Clock,
   CreditCard,
   Home,
   LogOut,
@@ -116,36 +115,9 @@ function AppSidebar({ pathname }: { pathname: string }) {
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/dashboard/history"}
-                >
-                  <a href="/dashboard/history">
-                    <Clock />
-                    <span>Riwayat Sesi</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarSeparator />
-        <SidebarGroup>
-          <SidebarGroupLabel>Pembelajaran</SidebarGroupLabel>
-          <SidebarGroupContent>
+
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/dashboard/progress"}
-                >
-                  <a href="/dashboard/progress">
-                    <BookOpen />
-                    <span>Progress Belajar</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
@@ -165,17 +137,6 @@ function AppSidebar({ pathname }: { pathname: string }) {
           <SidebarGroupLabel>Akun</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/dashboard/payments"}
-                >
-                  <a href="/dashboard/payments">
-                    <CreditCard />
-                    <span>Pembayaran</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
