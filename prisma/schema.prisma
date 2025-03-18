@@ -1,10 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -61,38 +54,40 @@ model VerificationRequest {
 }
 
 model User {
-  id               String             @id @default(cuid())
-  name             String?
-  email            String?            @unique
-  emailVerified    DateTime?
-  phone            String?
-  image            String?
-  location         String?
-  hasCompletedOnboarding Boolean?    @default(false)
-  bio              String?            @db.Text
-  profileImage     String?
-  joinDate         DateTime           @default(now())
-  password         String?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  accounts         Account[]
-  sessions         Session[]
-  interests        String[]
-  completedSessions Int               @default(0)
-  totalHours       Float              @default(0)
-  mentorCount      Int                @default(0)
-  
+  id                    String         @id @default(cuid())
+  name                  String?
+  email                 String?        @unique
+  emailVerified        DateTime?
+  phone                String?
+  image                String?
+  location             String?
+  hasCompletedOnboarding Boolean      @default(false)
+  bio                  String?         @db.Text
+  profileImage         String?
+  password             String?
+  interests            String[]
+  completedSessions    Int            @default(0)
+  totalHours           Float          @default(0)
+  mentorCount          Int            @default(0)
+  joinDate             DateTime       @default(now())
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
   // Mentor specific fields
-  isMentor         Boolean            @default(false)
-  expertise        String[]
-  rate             Float?
-  rating           Float?
-  reviewCount      Int                @default(0)
-  
+  isMentor             Boolean        @default(false)
+  expertise            String[]       @default([])
+  rate                 Float?
+  rating               Float?         @default(0)
+  reviewCount          Int            @default(0)
+
   // Relations
-  education        Education[]
-  experience       Experience[]
-  availability     Availability[]
+  accounts             Account[]
+  sessions             Session[]
+  education            Education[]
+  experience           Experience[]
+  availability         Availability[]
+  mentorBookings       Booking[]      @relation("MentorBookings")
+  studentBookings      Booking[]      @relation("StudentBookings")
 
   @@map("users")
 }
@@ -133,4 +128,29 @@ model Availability {
   updatedAt    DateTime  @updatedAt
 
   @@map("availability")
+}
+
+model Booking {
+  id            String    @id @default(cuid())
+  mentorId      String
+  studentId     String
+  topic         String
+  date          DateTime
+  duration      Int
+  status        String    // pending, confirmed, completed, cancelled
+  notes         String?   @db.Text
+  
+  // Zoom meeting fields
+  zoomMeetingId String?   
+  zoomJoinUrl   String?   @db.Text
+  zoomStartUrl  String?   @db.Text
+  zoomPassword  String?
+  
+  // Relations
+  mentor        User      @relation("MentorBookings", fields: [mentorId], references: [id])
+  student       User      @relation("StudentBookings", fields: [studentId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("bookings")
 }
