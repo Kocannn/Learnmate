@@ -1,305 +1,418 @@
-import Link from "next/link";
-import { ArrowLeft, Calendar, Clock, Star, User } from "lucide-react";
-import { PrismaClient } from "@prisma/client";
-import { notFound } from "next/navigation";
+"use client";
 
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import { Calendar, Clock, Award, MapPin } from "lucide-react";
+import { format, parse } from "date-fns";
+import { getAvailableDates } from "@/lib/date-utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
 
-async function getMentor(id: string) {
-  const prisma = new PrismaClient();
-
-  try {
-    const mentor = await prisma.user.findUnique({
-      where: {
-        id: id,
-        isMentor: true,
-      },
-      include: {
-        experience: true,
-        education: true,
-        availability: true,
-      },
-    });
-
-    if (!mentor) {
-      return null;
-    }
-
-    // Mock reviews data since we don't have a reviews table yet
-    const mockReviews = [
-      {
-        id: 1,
-        user: "Ahmad",
-        rating: 5,
-        comment:
-          "Mentor yang sangat membantu dan sabar dalam menjelaskan konsep-konsep yang kompleks.",
-        date: "2 bulan yang lalu",
-      },
-      {
-        id: 2,
-        user: "Siti",
-        rating: 5,
-        comment: `Saya belajar banyak dari sesi mentoring dengan ${mentor.name}. Sangat direkomendasikan!`,
-        date: "3 bulan yang lalu",
-      },
-      {
-        id: 3,
-        user: "Rudi",
-        rating: 4,
-        comment:
-          "Mentor yang baik dengan pengetahuan yang luas tentang pengembangan web.",
-        date: "4 bulan yang lalu",
-      },
-    ];
-
-    return {
-      ...mentor,
-      reviews: mockReviews,
-    };
-  } catch (error) {
-    console.error("Failed to fetch mentor:", error);
-    return null;
-  } finally {
-    await prisma.$disconnect();
-  }
+// This function gets the next 7 days as options for booking
+const availableDates = getAvailableDates();
+// This function gets available time slots
+function getAvailableTimeSlots() {
+  return [
+    { value: "09:00:00", label: "09:00" },
+    { value: "10:30:00", label: "10:30" },
+    { value: "13:00:00", label: "13:00" },
+    { value: "14:30:00", label: "14:30" },
+    { value: "16:00:00", label: "16:00" },
+  ];
 }
 
-export default async function MentorDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { id } = await params;
-  const mentor = await getMentor(id);
+export default function MentorProfilePage() {
+  const { id } = useParams();
+  const router = useRouter();
+  const [mentor, setMentor] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+  const [notes, setNotes] = useState("");
+  const [isBooking, setIsBooking] = useState(false);
+
+  const availableDates = getAvailableDates();
+  const availableTimes = getAvailableTimeSlots();
+
+  useEffect(() => {
+    async function fetchMentorData() {
+      try {
+        const response = await fetch(`/api/v1/mentors/${id}`);
+        if (!response.ok) throw new Error("Failed to fetch mentor data");
+        const data = await response.json();
+        setMentor(data);
+      } catch (error) {
+        console.error("Error fetching mentor data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMentorData();
+  }, [id]);
+
+  if (mentor) console.log(mentor);
+  async function handleBookSession() {
+    if (!selectedDate || !selectedTime) {
+      toast({
+        title: "Informasi tidak lengkap",
+        description: "Pilih tanggal dan waktu sesi terlebih dahulu",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsBooking(true);
+
+    try {
+      // Format date for the API
+      const sessionDateTime = `${selectedDate}T${selectedTime}`;
+
+      // Create booking in the database
+      const response = await fetch("/api/v1/bookings/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mentorId: mentor?.id,
+          date: sessionDateTime,
+          duration: 60, // 1 hour sessions
+          topic: `Sesi dengan ${mentor?.name}`,
+          notes: notes,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Gagal membuat booking");
+      }
+
+      const bookingData = await response.json();
+
+      // Navigate to booking confirmation page with the booking ID
+      router.push(`/dashboard/booking/confirm?id=${bookingData.id}`);
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      toast({
+        title: "Gagal membuat booking",
+        description:
+          "Terjadi kesalahan saat membuat booking. Silakan coba lagi.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBooking(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!mentor) {
-    notFound();
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Mentor tidak ditemukan</h2>
+          <p className="mt-2">Mentor yang Anda cari tidak tersedia</p>
+          <Button
+            className="mt-4"
+            onClick={() => router.push("/dashboard/mentors")}
+          >
+            Kembali ke Daftar Mentor
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Button variant="ghost" size="sm" asChild className="mb-4">
-          <Link href="/dashboard/search">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Kembali ke Pencarian
-          </Link>
-        </Button>
-      </div>
-
-      {/* Mentor Profile */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Mentor Profile Section */}
         <div className="md:col-span-1">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="pt-6">
               <div className="flex flex-col items-center">
-                <img
-                  src={mentor.profileImage || "/placeholder.svg"}
-                  alt={mentor.name}
-                  className="rounded-full h-32 w-32 mb-4"
-                />
+                <div className="relative w-32 h-32 mb-4">
+                  <Image
+                    src={mentor.profileImage || "/placeholder.svg"}
+                    alt={mentor.name || "Mentor"}
+                    fill
+                    className="rounded-full object-cover"
+                  />
+                </div>
                 <h2 className="text-xl font-bold">{mentor.name}</h2>
-                <div className="flex items-center gap-1 mt-1">
-                  <span className="text-sm text-muted-foreground">
-                    {mentor.interests[0]}
-                  </span>
-                  <span className="text-xs">•</span>
-                  <span className="text-sm text-muted-foreground">
-                    {mentor.interests[1]}
-                  </span>
-                </div>
+                <p className="text-muted-foreground">
+                  {mentor.expertise.join(", ")}
+                </p>
+
                 <div className="flex items-center mt-2">
-                  <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                  <span className="ml-1 font-medium">{mentor.rating}</span>
-                  <span className="text-sm text-muted-foreground ml-1">
-                    ({mentor.reviewCount} ulasan)
+                  <MapPin size={16} className="mr-1 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {mentor.location || "Indonesia"}
                   </span>
                 </div>
-                <div className="mt-4 text-center">
-                  <span className="text-xl font-bold">
-                    Rp {mentor.rate?.toLocaleString()}
-                  </span>
-                  <span className="text-sm text-muted-foreground"> / sesi</span>
+
+                <div className="mt-4 flex space-x-2">
+                  {mentor.interests?.slice(0, 3).map((skill, index) => (
+                    <span
+                      key={index}
+                      className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full"
+                    >
+                      {skill}
+                    </span>
+                  ))}
                 </div>
-                <Button className="w-full mt-6">Jadwalkan Sesi</Button>
+
+                <Separator className="my-4" />
+
+                <div className="w-full">
+                  <div className="flex justify-between mb-2">
+                    <span>Rating</span>
+                    <span className="font-medium">
+                      {mentor.rating || "4.8"}/5
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Sesi Selesai</span>
+                    <span className="font-medium">
+                      {mentor.sessionsCompleted || "24"}
+                    </span>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Main Content Section */}
         <div className="md:col-span-2">
-          <Tabs defaultValue="profile">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="profile">Profil</TabsTrigger>
+          <Tabs defaultValue="about">
+            <TabsList className="grid grid-cols-3 mb-8">
+              <TabsTrigger value="about">Tentang</TabsTrigger>
+              <TabsTrigger value="schedule">Jadwal Sesi</TabsTrigger>
               <TabsTrigger value="reviews">Ulasan</TabsTrigger>
-              <TabsTrigger value="schedule">Jadwal</TabsTrigger>
             </TabsList>
-            <TabsContent value="profile" className="mt-4">
+
+            <TabsContent value="about">
               <Card>
                 <CardHeader>
                   <CardTitle>Tentang Mentor</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <h3 className="font-medium mb-2">Bio</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {mentor.bio}
-                    </p>
-                  </div>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    {mentor.bio || "Tidak ada deskripsi tersedia."}
+                  </p>
 
-                  <div>
-                    <h3 className="font-medium mb-2">Pengalaman</h3>
-                    <div className="space-y-3">
-                      {mentor.experience.map((exp, index) => (
-                        <div key={index} className="flex items-start">
-                          <div className="h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center mr-3">
-                            <User className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm">
-                              {exp.position}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {exp.company}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {exp.duration}
-                            </p>
-                          </div>
+                  <h3 className="font-semibold mt-6 mb-2 flex items-center">
+                    <Award size={18} className="mr-2 text-primary" />
+                    Pengalaman
+                  </h3>
+                  <ul className="space-y-2">
+                    {mentor.experience?.map((exp, index) => (
+                      <li key={index} className="border-b border-border pb-2">
+                        <div className="font-medium">{exp.position}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {exp.company} • {exp.years}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-medium mb-2">Pendidikan</h3>
-                    <div className="space-y-3">
-                      {mentor.education.map((edu, index) => (
-                        <div key={index} className="flex items-start">
-                          <div className="h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center mr-3">
-                            <User className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm">{edu.degree}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {edu.institution}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {edu.year}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-medium mb-2">Keahlian</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {mentor.expertise.map((skill, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300 rounded-full text-xs"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                      </li>
+                    )) || <li>Tidak ada data pengalaman</li>}
+                  </ul>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="reviews" className="mt-4">
+            <TabsContent value="schedule">
               <Card>
                 <CardHeader>
-                  <CardTitle>Ulasan Mentee</CardTitle>
-                  <CardDescription>
-                    Apa kata mentee tentang {mentor.name}
-                  </CardDescription>
+                  <CardTitle>Jadwalkan Sesi</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {mentor.reviews.map((review) => (
-                      <div
-                        key={review.id}
-                        className="pb-6 border-b last:border-0"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mr-3">
-                              <span className="text-sm font-medium">
-                                {review.user.charAt(0)}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="font-medium">{review.user}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {review.date}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${i < review.rating ? "fill-yellow-500 text-yellow-500" : "text-slate-300 dark:text-slate-600"}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="mt-3 text-sm">{review.comment}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="schedule" className="mt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Jadwal Tersedia</CardTitle>
-                  <CardDescription>
-                    Pilih tanggal dan waktu yang tersedia untuk sesi mentoring
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {mentor.availability.map((schedule, index) => (
-                      <div key={index} className="pb-6 border-b last:border-0">
-                        <div className="flex items-center mb-4">
-                          <Calendar className="h-5 w-5 mr-2 text-indigo-600 dark:text-indigo-400" />
-                          <h3 className="font-medium">{schedule.day}</h3>
-                        </div>
-                        <div className="grid grid-cols-3 gap-3">
-                          {schedule.slots.map((time, i) => (
-                            <Button
-                              key={i}
-                              variant="outline"
-                              className="flex items-center justify-center"
+                    <div>
+                      <Label className="text-base">Pilih Tanggal</Label>
+                      <Carousel className="mt-2">
+                        <CarouselContent>
+                          {availableDates.map((date) => (
+                            <CarouselItem
+                              key={date.value}
+                              className="basis-auto"
                             >
-                              <Clock className="h-4 w-4 mr-2" />
-                              {time}
-                            </Button>
+                              <div
+                                className={`py-3 px-5 border rounded-md cursor-pointer transition-colors ${
+                                  selectedDate === date.value
+                                    ? "border-primary bg-primary/10"
+                                    : "hover:border-primary/50"
+                                }`}
+                                onClick={() => setSelectedDate(date.value)}
+                              >
+                                <div className="text-center">
+                                  <Calendar
+                                    size={16}
+                                    className="mx-auto mb-1"
+                                  />
+                                  <div className="text-sm font-medium">
+                                    {(() => {
+                                      try {
+                                        return format(
+                                          parse(
+                                            date.value,
+                                            "yyyy-MM-dd",
+                                            new Date(),
+                                          ),
+                                          "EEEE",
+                                          { locale: id },
+                                        );
+                                      } catch (error) {
+                                        // Fallback to simple day name if formatting fails
+                                        return new Date(
+                                          date.value,
+                                        ).toLocaleDateString("id-ID", {
+                                          weekday: "long",
+                                        });
+                                      }
+                                    })()}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {(() => {
+                                      try {
+                                        return format(
+                                          parse(
+                                            date.value,
+                                            "yyyy-MM-dd",
+                                            new Date(),
+                                          ),
+                                          "dd MMM",
+                                          { locale: id },
+                                        );
+                                      } catch (error) {
+                                        return new Date(
+                                          date.value,
+                                        ).toLocaleDateString("id-ID", {
+                                          day: "2-digit",
+                                          month: "short",
+                                        });
+                                      }
+                                    })()}
+                                  </div>
+                                </div>
+                              </div>
+                            </CarouselItem>
                           ))}
+                        </CarouselContent>
+                        <div className="hidden md:block">
+                          <CarouselPrevious />
+                          <CarouselNext />
                         </div>
-                      </div>
-                    ))}
+                      </Carousel>
+                    </div>
+
+                    <div>
+                      <Label className="text-base">Pilih Waktu</Label>
+                      <RadioGroup
+                        value={selectedTime}
+                        onValueChange={setSelectedTime}
+                        className="grid grid-cols-3 gap-2 mt-2"
+                      >
+                        {availableTimes.map((time) => (
+                          <div key={time.value} className="relative">
+                            <RadioGroupItem
+                              value={time.value}
+                              id={`time-${time.value}`}
+                              className="peer sr-only"
+                            />
+                            <Label
+                              htmlFor={`time-${time.value}`}
+                              className="flex items-center justify-center py-2 border rounded-md cursor-pointer transition-colors peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:border-primary/50"
+                            >
+                              <Clock size={14} className="mr-1" />
+                              {time.label}
+                            </Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </div>
+
+                    <div>
+                      <Label className="text-base">Catatan (Opsional)</Label>
+                      <Textarea
+                        placeholder="Jelaskan topik yang ingin dibahas dalam sesi"
+                        className="mt-2"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                      />
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full">Lanjut ke Pembayaran</Button>
+                  <Button
+                    className="w-full h-12"
+                    onClick={handleBookSession}
+                    disabled={!selectedDate || !selectedTime || isBooking}
+                  >
+                    {isBooking ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent mr-2"></div>
+                        Membuat Booking...
+                      </>
+                    ) : (
+                      "Jadwalkan Sesi"
+                    )}
+                  </Button>
                 </CardFooter>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="reviews">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ulasan Mentee</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {mentor.reviews?.length > 0 ? (
+                    <div className="space-y-4">
+                      {mentor.reviews.map((review, index) => (
+                        <div key={index} className="border-b pb-4">
+                          <div className="flex items-center">
+                            <div className="font-medium">{review.name}</div>
+                            <div className="text-xs ml-2 bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded">
+                              {review.rating}/5
+                            </div>
+                          </div>
+                          <div className="text-sm mt-2">{review.comment}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      Belum ada ulasan untuk mentor ini.
+                    </p>
+                  )}
+                </CardContent>
               </Card>
             </TabsContent>
           </Tabs>

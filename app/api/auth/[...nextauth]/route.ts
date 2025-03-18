@@ -76,7 +76,6 @@ export const authOptions: NextAuthOptions = {
         if (updatedUser) {
           session.user = updatedUser; // Perbarui session dengan data terbaru
         }
-        console.log("session.user", session.user);
       }
       return session;
     },

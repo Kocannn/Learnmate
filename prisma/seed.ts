@@ -4,10 +4,14 @@ import { hash } from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Clear existing data
+  // Clear existing data in the correct order (respecting foreign key constraints)
+  await prisma.booking.deleteMany();
   await prisma.availability.deleteMany();
   await prisma.experience.deleteMany();
   await prisma.education.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.account.deleteMany();
+  await prisma.verificationRequest.deleteMany();
   await prisma.user.deleteMany();
 
   console.log("Seeding database...");
@@ -37,6 +41,10 @@ async function main() {
       rate: 350000,
       rating: 4.9,
       reviewCount: 15,
+      completedSessions: 25,
+      totalHours: 50.5,
+      mentorCount: 0,
+      emailVerified: new Date(),
     },
     {
       name: "Siti Rahma",
@@ -61,6 +69,10 @@ async function main() {
       rate: 300000,
       rating: 4.8,
       reviewCount: 12,
+      completedSessions: 18,
+      totalHours: 36.0,
+      mentorCount: 0,
+      emailVerified: new Date(),
     },
     {
       name: "Ahmad Wijaya",
@@ -85,6 +97,10 @@ async function main() {
       rate: 400000,
       rating: 4.7,
       reviewCount: 9,
+      completedSessions: 15,
+      totalHours: 30.0,
+      mentorCount: 0,
+      emailVerified: new Date(),
     },
   ];
 
@@ -101,6 +117,10 @@ async function main() {
       password: await hash("password123", 10),
       interests: ["Web Development", "JavaScript", "React"],
       isMentor: false,
+      completedSessions: 0,
+      totalHours: 0,
+      mentorCount: 0,
+      emailVerified: new Date(),
     },
     {
       name: "Deni Susanto",
@@ -113,6 +133,10 @@ async function main() {
       password: await hash("password123", 10),
       interests: ["Data Science", "Python", "Machine Learning"],
       isMentor: false,
+      completedSessions: 0,
+      totalHours: 0,
+      mentorCount: 0,
+      emailVerified: new Date(),
     },
     {
       name: "Maya Putri",
@@ -125,10 +149,14 @@ async function main() {
       password: await hash("password123", 10),
       interests: ["UI Design", "UX Design", "Figma"],
       isMentor: false,
+      completedSessions: 0,
+      totalHours: 0,
+      mentorCount: 0,
+      emailVerified: new Date(),
     },
   ];
 
-  // Insert users
+  // Insert mentors and create related data
   for (const mentorData of mentors) {
     const mentor = await prisma.user.create({
       data: mentorData,
@@ -137,7 +165,7 @@ async function main() {
     console.log(`Created mentor: ${mentor.name}`);
 
     // Create education for mentors
-    if (mentor.id === mentors[0].email) {
+    if (mentor.email === mentors[0].email) {
       // Budi Santoso
       await prisma.education.createMany({
         data: [
@@ -149,7 +177,7 @@ async function main() {
           },
         ],
       });
-    } else if (mentor.id === mentors[1].email) {
+    } else if (mentor.email === mentors[1].email) {
       // Siti Rahma
       await prisma.education.createMany({
         data: [
@@ -167,7 +195,7 @@ async function main() {
           },
         ],
       });
-    } else if (mentor.id === mentors[2].email) {
+    } else if (mentor.email === mentors[2].email) {
       // Ahmad Wijaya
       await prisma.education.createMany({
         data: [
@@ -188,7 +216,7 @@ async function main() {
     }
 
     // Create experience for mentors
-    if (mentor.id === mentors[0].email) {
+    if (mentor.email === mentors[0].email) {
       // Budi Santoso
       await prisma.experience.createMany({
         data: [
@@ -206,7 +234,7 @@ async function main() {
           },
         ],
       });
-    } else if (mentor.id === mentors[1].email) {
+    } else if (mentor.email === mentors[1].email) {
       // Siti Rahma
       await prisma.experience.createMany({
         data: [
@@ -224,7 +252,7 @@ async function main() {
           },
         ],
       });
-    } else if (mentor.id === mentors[2].email) {
+    } else if (mentor.email === mentors[2].email) {
       // Ahmad Wijaya
       await prisma.experience.createMany({
         data: [
@@ -250,21 +278,28 @@ async function main() {
       });
     }
 
-    // Create availability for mentors
+    // Create availability with dynamic dates
+    const today = new Date();
     await prisma.availability.createMany({
       data: [
         {
-          day: "10 Maret 2025",
+          day: new Date(today.setDate(today.getDate() + 1))
+            .toISOString()
+            .split("T")[0],
           slots: ["09:00", "13:00", "15:00"],
           userId: mentor.id,
         },
         {
-          day: "11 Maret 2025",
+          day: new Date(today.setDate(today.getDate() + 1))
+            .toISOString()
+            .split("T")[0],
           slots: ["10:00", "14:00"],
           userId: mentor.id,
         },
         {
-          day: "12 Maret 2025",
+          day: new Date(today.setDate(today.getDate() + 1))
+            .toISOString()
+            .split("T")[0],
           slots: ["09:00", "11:00", "16:00"],
           userId: mentor.id,
         },
@@ -279,6 +314,56 @@ async function main() {
     });
 
     console.log(`Created mentee: ${mentee.name}`);
+  }
+
+  // Create sample bookings
+  const sampleBookings = [
+    {
+      mentorId: (await prisma.user.findUnique({
+        where: { email: mentors[0].email },
+      }))!.id,
+      studentId: (await prisma.user.findUnique({
+        where: { email: mentees[0].email },
+      }))!.id,
+      topic: "JavaScript Fundamentals",
+      date: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
+      duration: 60,
+      status: "confirmed",
+      notes: "Focus on ES6+ features",
+    },
+    {
+      mentorId: (await prisma.user.findUnique({
+        where: { email: mentors[1].email },
+      }))!.id,
+      studentId: (await prisma.user.findUnique({
+        where: { email: mentees[1].email },
+      }))!.id,
+      topic: "UI/UX Design Principles",
+      date: new Date(Date.now() + 48 * 60 * 60 * 1000), // Day after tomorrow
+      duration: 90,
+      status: "pending",
+      notes: "Portfolio review session",
+    },
+    {
+      mentorId: (await prisma.user.findUnique({
+        where: { email: mentors[2].email },
+      }))!.id,
+      studentId: (await prisma.user.findUnique({
+        where: { email: mentees[2].email },
+      }))!.id,
+      topic: "Data Science Basics",
+      date: new Date(Date.now() + 72 * 60 * 60 * 1000), // 3 days from now
+      duration: 120,
+      status: "confirmed",
+      notes: "Introduction to Python for Data Science",
+    },
+  ];
+
+  for (const bookingData of sampleBookings) {
+    await prisma.booking.create({
+      data: bookingData,
+    });
+    console.log(`Created booking for topic: ${bookingData.topic}`);
   }
 
   console.log("Database seeded successfully");
