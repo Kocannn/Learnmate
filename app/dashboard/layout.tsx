@@ -110,7 +110,7 @@ function AppSidebar({ pathname }: { pathname: string }) {
                   asChild
                   isActive={pathname === "/dashboard/bookings"}
                 >
-                  <a href="/dashboard/bookings">
+                  <a href="/dashboard/booking">
                     <Calendar />
                     <span>Jadwal Sesi</span>
                   </a>
