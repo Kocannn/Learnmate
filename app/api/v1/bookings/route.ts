@@ -3,40 +3,22 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    // Get the authenticated user
     const session = await getServerSession(authOptions);
 
-    if (!session?.user) {
+    if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get user ID from session
     const userId = session.user.id;
-    const userRole = session.user.isMentor ? "MENTOR" : "STUDENT";
 
-    // Get URL parameters
-    const url = new URL(request.url);
-    const type = url.searchParams.get("type") || "all"; // 'upcoming', 'past', 'all'
-
-    // Define where conditions based on user role and booking type
-    const where: any = {};
-
-    if (userRole === "MENTOR") {
-      where.mentorId = userId;
-    } else {
-      where.studentId = userId;
-    }
-
-    if (type === "upcoming") {
-      where.date = { gte: new Date() };
-    } else if (type === "past") {
-      where.date = { lt: new Date() };
-    }
-
-    // Fetch bookings with mentor and student details
+    // Fetch bookings where the user is either the mentor or the student
     const bookings = await prisma.booking.findMany({
-      where,
+      where: {
+        OR: [{ mentorId: userId }, { studentId: userId }],
+      },
       include: {
         mentor: {
           select: {
@@ -47,33 +29,39 @@ export async function GET(request: Request) {
             rate: true,
           },
         },
-        student: {
-          select: {
-            id: true,
-            name: true,
-            profileImage: true,
-          },
-        },
       },
       orderBy: {
-        date: type === "past" ? "desc" : "asc",
+        date: "asc",
       },
     });
 
-    return NextResponse.json({
-      upcoming:
-        type !== "past"
-          ? bookings.filter((b) => new Date(b.date) >= new Date())
-          : [],
-      past:
-        type !== "upcoming"
-          ? bookings.filter((b) => new Date(b.date) < new Date())
-          : [],
-    });
+    // Format bookings to match the expected structure
+    const formattedBookings = bookings.map((booking) => ({
+      id: booking.id,
+      mentorId: booking.mentorId,
+      studentId: booking.studentId,
+      topic: booking.topic,
+      date: booking.date.toISOString(),
+      duration: booking.duration,
+      status: booking.status,
+      zoomJoinUrl: booking.zoomJoinUrl,
+      zoomStartUrl: booking.zoomStartUrl,
+      zoomPassword: booking.zoomPassword,
+      reviewed: false, // This would come from a review table in a real system
+      mentor: {
+        id: booking.mentor.id,
+        name: booking.mentor.name,
+        profileImage: booking.mentor.profileImage,
+        expertise: booking.mentor.expertise,
+        rate: booking.mentor.rate,
+      },
+    }));
+
+    return NextResponse.json({ bookings: formattedBookings });
   } catch (error) {
     console.error("Error fetching bookings:", error);
     return NextResponse.json(
-      { error: "Failed to fetch bookings" },
+      { error: "Internal server error" },
       { status: 500 },
     );
   }
