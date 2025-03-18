@@ -315,11 +315,11 @@ Membuat Zoom meeting untuk booking.
 
 ## Kontributor
 
-- Nama Lengkap (@username)
+- Dwi Candra Andika (F 551 23 028)
 
 ## Lisensi
 
-Hak Cipta © 2023 LearnMate. Seluruh hak dilindungi.
+Hak Cipta © 2025 LearnMate. Seluruh hak dilindungi.
 
 ---
 
