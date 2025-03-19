@@ -135,6 +135,7 @@ model Booking {
   mentorId      String
   studentId     String
   topic         String
+  time          String?
   date          DateTime
   duration      Int
   status        String    // pending, confirmed, completed, cancelled
