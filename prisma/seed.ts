@@ -327,6 +327,7 @@ async function main() {
       }))!.id,
       topic: "JavaScript Fundamentals",
       date: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
+      time: "14:00", // Added time field
       duration: 60,
       status: "confirmed",
       notes: "Focus on ES6+ features",
@@ -340,6 +341,7 @@ async function main() {
       }))!.id,
       topic: "UI/UX Design Principles",
       date: new Date(Date.now() + 48 * 60 * 60 * 1000), // Day after tomorrow
+      time: "10:30", // Added time field
       duration: 90,
       status: "pending",
       notes: "Portfolio review session",
@@ -353,6 +355,7 @@ async function main() {
       }))!.id,
       topic: "Data Science Basics",
       date: new Date(Date.now() + 72 * 60 * 60 * 1000), // 3 days from now
+      time: "15:45", // Added time field
       duration: 120,
       status: "confirmed",
       notes: "Introduction to Python for Data Science",
