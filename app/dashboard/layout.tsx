@@ -53,12 +53,12 @@ export default function DashboardLayout({
                 <span className="sr-only sm:not-sr-only">Notifikasi</span>
               </Button>
 
-              <Button variant="ghost" size="sm">
-                <User className="h-4 w-4 mr-2" />
-                <Link href="/dashboard/profile">
+              <Link href="/dashboard/profile">
+                <Button variant="ghost" size="sm">
+                  <User className="h-4 w-4 mr-2" />
                   <span className="sr-only sm:not-sr-only">Profil</span>
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             </div>
           </div>
           <div className="p-6 min-h-screen">{children}</div>
