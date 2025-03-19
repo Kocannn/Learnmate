@@ -97,6 +97,7 @@ export default function MentorProfilePage() {
         body: JSON.stringify({
           mentorId: mentor?.id,
           date: sessionDateTime,
+          time: selectedTime.slice(0, 5), // Extract HH:MM format from selectedTime
           duration: 60, // 1 hour sessions
           topic: `Sesi dengan ${mentor?.name}`,
           notes: notes,

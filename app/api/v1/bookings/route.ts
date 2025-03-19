@@ -47,6 +47,8 @@ export async function GET() {
       zoomJoinUrl: booking.zoomJoinUrl,
       zoomStartUrl: booking.zoomStartUrl,
       zoomPassword: booking.zoomPassword,
+      notes: booking.notes,
+      time: booking.time,
       reviewed: false, // This would come from a review table in a real system
       mentor: {
         id: booking.mentor.id,

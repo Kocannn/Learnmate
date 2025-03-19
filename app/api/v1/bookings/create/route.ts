@@ -21,7 +21,8 @@ export async function POST(request: Request) {
     const studentId = session.user.id;
 
     // Get data from request body
-    const { mentorId, date, duration, topic, notes } = await request.json();
+    const { mentorId, date, duration, topic, notes, time } =
+      await request.json();
 
     // Validate required fields
     if (!mentorId || !date) {
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
     const booking = await prisma.booking.create({
       data: {
         mentorId,
+        time,
         studentId,
         topic,
         date: new Date(date),

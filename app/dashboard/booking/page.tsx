@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -32,7 +31,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -41,28 +39,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Define types to match our database schema
-interface Mentor {
-  id: string;
-  name: string;
-  profileImage: string;
-  expertise: string;
-  rate?: number;
-}
-
-interface Booking {
-  id: string;
-  mentor: Mentor;
-  mentorId: string;
-  studentId: string;
-  topic: string;
-  date: string;
-  duration: number;
-  status: "pending" | "confirmed" | "completed" | "cancelled";
-  zoomJoinUrl?: string;
-  zoomStartUrl?: string;
-  zoomPassword?: string;
-  reviewed?: boolean;
-}
 
 export default function BookingsPage() {
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
