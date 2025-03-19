@@ -54,10 +54,89 @@ async function getMentors() {
   return res.json();
 }
 
+function generateRecommendations(
+  mentors: Mentor[],
+  pastBookings: Booking[],
+  limit = 3,
+): Mentor[] {
+  // Extract user's interests based on past bookings
+  const userInterests = new Set<string>();
+  const mentorInteractionCount = new Map<string, number>();
+  const pastMentorIds = new Set<string>();
+
+  // Analyze past bookings to understand user preferences
+  pastBookings.forEach((booking) => {
+    // Track topics user has shown interest in
+    if (booking.topic) {
+      const topics = booking.topic.split(/,\s*/).map((t) => t.toLowerCase());
+      topics.forEach((t) => userInterests.add(t));
+    }
+
+    // Track mentors user has worked with
+    pastMentorIds.add(booking.mentorId);
+    mentorInteractionCount.set(
+      booking.mentorId,
+      (mentorInteractionCount.get(booking.mentorId) || 0) + 1,
+    );
+  });
+
+  // Calculate a score for each mentor based on multiple factors
+  const scoredMentors = mentors.map((mentor) => {
+    // Base score starts with rating (0-5 scale)
+    let score = mentor.rating || 0;
+
+    // Factor 1: Popularity (normalized review count with diminishing returns)
+    score += Math.min(Math.sqrt(mentor.reviewCount) / 2, 2);
+
+    // Factor 2: Content-based filtering - interest matching
+    const interestMatchScore = mentor.interests.reduce((sum, interest) => {
+      return userInterests.has(interest.toLowerCase()) ? sum + 0.75 : sum;
+    }, 0);
+    score += Math.min(interestMatchScore, 3); // Cap at 3 points
+
+    // Factor 3: Collaborative filtering - previous interactions
+    if (pastMentorIds.has(mentor.id)) {
+      // More interactions = stronger preference, with diminishing returns
+      const interactionCount = mentorInteractionCount.get(mentor.id) || 0;
+      score += Math.min(0.5 * Math.sqrt(interactionCount), 1.5);
+    }
+
+    // Factor 4: Penalize extremes (too few or too many reviews)
+    if (mentor.reviewCount < 3) {
+      score -= 0.5; // New mentors with few reviews
+    }
+
+    return { mentor, score, interestMatch: interestMatchScore > 0 };
+  });
+
+  // Sort by score (highest first)
+  scoredMentors.sort((a, b) => b.score - a.score);
+
+  // Apply diversity - ensure we have some interest-matched mentors
+  const diverseRecommendations = [];
+  const interestMatched = scoredMentors.filter((item) => item.interestMatch);
+  const otherOptions = scoredMentors.filter((item) => !item.interestMatch);
+
+  // Try to include at least one interest-matched mentor if available
+  if (interestMatched.length > 0) {
+    diverseRecommendations.push(interestMatched[0].mentor);
+    diverseRecommendations.push(
+      ...scoredMentors.slice(0, limit - 1).map((item) => item.mentor),
+    );
+  } else {
+    diverseRecommendations.push(
+      ...scoredMentors.slice(0, limit).map((item) => item.mentor),
+    );
+  }
+
+  // Return unique mentors up to the limit
+  return [...new Set(diverseRecommendations)].slice(0, limit);
+}
 export default function DashboardPage() {
   // Sample data for recommended mentors
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [recommendedMentors, setRecommendedMentors] = useState<Mentor[]>([]);
 
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
   const [pastBookings, setPastBookings] = useState<Booking[]>([]);
@@ -67,6 +146,9 @@ export default function DashboardPage() {
       try {
         const data = await getMentors();
         setMentors(data);
+        // Generate recommendations based on past bookings
+        const recommended = generateRecommendations(data, pastBookings);
+        setRecommendedMentors(recommended);
       } catch (error) {
         console.error("Error loading mentors:", error);
       } finally {
@@ -115,7 +197,10 @@ export default function DashboardPage() {
     loadMentors();
   }, []);
   // Sample data for upcoming sessions
-  //
+
+  if (recommendedMentors.length !== 0) {
+    console.log(recommendedMentors);
+  }
   // Sort upcoming bookings by date & time and limit to even number
   const upcomingSessions = upcomingBookings
     .sort((a, b) => {
@@ -124,62 +209,8 @@ export default function DashboardPage() {
       return dateA.getTime() - dateB.getTime();
     })
     .slice(0, 2);
-  console.log(upcomingSessions);
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Selamat datang kembali! Berikut adalah ringkasan aktivitas Anda.
-        </p>
-      </div>
-
-      {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Sesi</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">+2 dari bulan lalu</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Jam Belajar</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">+4 dari bulan lalu</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Mentor</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">+1 dari bulan lalu</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Rating Diberikan
-            </CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">+2 dari bulan lalu</p>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Recommended Mentors */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -223,7 +254,7 @@ export default function DashboardPage() {
                     </CardFooter>
                   </Card>
                 ))
-            : mentors.map((mentor) => (
+            : recommendedMentors.map((mentor) => (
                 <Card key={mentor.id} className="overflow-hidden">
                   <CardHeader className="p-0">
                     <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-12" />
@@ -246,6 +277,9 @@ export default function DashboardPage() {
                         <div className="flex items-center">
                           <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
                           <span className="text-sm ml-1">{mentor.rating}</span>
+                          <span className="text-xs ml-1">
+                            ({mentor.reviewCount})
+                          </span>
                         </div>
                       </div>
                       <p className="text-sm text-center text-muted-foreground mt-3">
