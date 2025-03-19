@@ -5,13 +5,15 @@ declare global {
     studentId: string;
     topic: string;
     date: string; // Gunakan Date jika ingin parsing otomatis
+    time?: string;
     duration: number;
-    status: "pending" | "confirmed" | "completed" | "canceled";
+    status: "pending" | "confirmed" | "completed" | "cancelled";
     notes: string | null;
     zoomMeetingId: string | null;
     zoomJoinUrl: string | null;
     zoomPassword: string | null;
     zoomStartUrl: string | null;
+    reviewed: boolean;
     mentor: {
       id: string;
       name: string;
