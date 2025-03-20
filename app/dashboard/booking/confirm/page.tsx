@@ -151,7 +151,7 @@ export default function BookingConfirmPage() {
           </CardHeader>
           <CardFooter>
             <Button asChild>
-              <Link href="/dashboard/bookings">
+              <Link href="/dashboard/booking">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Kembali ke Daftar Booking
               </Link>
@@ -174,7 +174,7 @@ export default function BookingConfirmPage() {
           </CardHeader>
           <CardFooter>
             <Button asChild>
-              <Link href="/dashboard/bookings">
+              <Link href="/dashboard/booking">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Kembali ke Daftar Booking
               </Link>
@@ -188,7 +188,7 @@ export default function BookingConfirmPage() {
   return (
     <div className="container max-w-4xl mx-auto p-4">
       <Button variant="ghost" asChild className="mb-6">
-        <Link href="/dashboard/bookings">
+        <Link href="/dashboard/booking">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Daftar Booking
         </Link>
