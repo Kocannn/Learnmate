@@ -132,16 +132,12 @@ export default function SearchPage() {
               <SelectItem value="business">Business</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
         </div>
       </div>
 
       {/* Advanced Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 border rounded-lg bg-slate-50 dark:bg-slate-900">
-        <div>
+        <div className="col-span-2">
           <h3 className="text-sm font-medium mb-2">Rating</h3>
           <Select
             defaultValue={filters.minRating}
