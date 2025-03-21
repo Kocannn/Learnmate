@@ -46,6 +46,11 @@ export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    category: "all",
+    minRating: "0",
+    maxPrice: 1000000,
+  });
 
   useEffect(() => {
     async function loadMentors() {
@@ -62,14 +67,32 @@ export default function SearchPage() {
     loadMentors();
   }, []);
 
-  // Filter mentors based on search query
-  const filteredMentors = mentors.filter(
-    (mentor) =>
+  // Filter mentors based on search query and other filters
+  const filteredMentors = mentors.filter((mentor) => {
+    // Filter by search query (name or interests)
+    const matchesSearch =
+      searchQuery === "" ||
       mentor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       mentor.interests.some((interest) =>
         interest.toLowerCase().includes(searchQuery.toLowerCase()),
-      ),
-  );
+      );
+
+    // Filter by category
+    const matchesCategory =
+      filters.category === "all" ||
+      mentor.interests.some((interest) =>
+        interest.toLowerCase().includes(filters.category.toLowerCase()),
+      );
+
+    // Filter by rating
+    const matchesRating = mentor.rating >= parseFloat(filters.minRating);
+
+    // Filter by price
+    const matchesPrice =
+      mentor.rate === null || mentor.rate <= filters.maxPrice;
+
+    return matchesSearch && matchesCategory && matchesRating && matchesPrice;
+  });
 
   return (
     <div className="space-y-6">
@@ -92,7 +115,12 @@ export default function SearchPage() {
           />
         </div>
         <div className="flex gap-2">
-          <Select defaultValue="all">
+          <Select
+            defaultValue={filters.category}
+            onValueChange={(value) =>
+              setFilters({ ...filters, category: value })
+            }
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Kategori" />
             </SelectTrigger>
@@ -115,11 +143,17 @@ export default function SearchPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 border rounded-lg bg-slate-50 dark:bg-slate-900">
         <div>
           <h3 className="text-sm font-medium mb-2">Rating</h3>
-          <Select defaultValue="4">
+          <Select
+            defaultValue={filters.minRating}
+            onValueChange={(value) =>
+              setFilters({ ...filters, minRating: value })
+            }
+          >
             <SelectTrigger>
               <SelectValue placeholder="Minimum Rating" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="0">Semua Rating</SelectItem>
               <SelectItem value="3">3+ Bintang</SelectItem>
               <SelectItem value="4">4+ Bintang</SelectItem>
               <SelectItem value="4.5">4.5+ Bintang</SelectItem>
@@ -129,15 +163,19 @@ export default function SearchPage() {
         <div>
           <h3 className="text-sm font-medium mb-2">Harga per Sesi</h3>
           <div className="pt-4">
-            <Slider defaultValue={[500000]} max={1000000} step={50000} />
+            <Slider
+              defaultValue={[filters.maxPrice]}
+              max={1000000}
+              step={50000}
+              onValueChange={(value) =>
+                setFilters({ ...filters, maxPrice: value[0] })
+              }
+            />
             <div className="flex justify-between mt-2 text-xs text-muted-foreground">
               <span>Rp 100.000</span>
-              <span>Rp 1.000.000</span>
+              <span>Rp {filters.maxPrice.toLocaleString()}</span>
             </div>
           </div>
-        </div>
-        <div className="flex items-end">
-          <Button className="w-full">Terapkan Filter</Button>
         </div>
       </div>
 
