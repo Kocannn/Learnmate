@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { Calendar, Clock, Award, MapPin } from "lucide-react";
-import { format, parse } from "date-fns";
+import { Calendar, Clock, Award, MapPin, Star } from "lucide-react";
+import { format, parse, formatDistanceToNow } from "date-fns";
 import { getAvailableDates } from "@/lib/date-utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +41,45 @@ function getAvailableTimeSlots() {
   ];
 }
 
+// Star Rating component
+function StarRating({ rating, size = 16 }: { rating: number; size?: number }) {
+  // Convert rating to a scale of 5 stars
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  return (
+    <div className="flex">
+      {/* Full stars */}
+      {Array(fullStars)
+        .fill(0)
+        .map((_, i) => (
+          <Star
+            key={`full-${i}`}
+            size={size}
+            className="text-yellow-400 fill-yellow-400"
+          />
+        ))}
+
+      {/* Half star */}
+      {hasHalfStar && (
+        <div className="relative">
+          <Star size={size} className="text-yellow-400" />
+          <div className="absolute top-0 left-0 overflow-hidden w-1/2">
+            <Star size={size} className="text-yellow-400 fill-yellow-400" />
+          </div>
+        </div>
+      )}
+
+      {/* Empty stars */}
+      {Array(emptyStars)
+        .fill(0)
+        .map((_, i) => (
+          <Star key={`empty-${i}`} size={size} className="text-yellow-400" />
+        ))}
+    </div>
+  );
+}
 export default function MentorProfilePage() {
   const { id } = useParams();
   const router = useRouter();
@@ -50,6 +89,74 @@ export default function MentorProfilePage() {
   const [selectedTime, setSelectedTime] = useState("");
   const [notes, setNotes] = useState("");
   const [isBooking, setIsBooking] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  useEffect(() => {
+    async function fetchMentorData() {
+      try {
+        const response = await fetch(
+          `/api/v1/mentors/${id}?includeReviews=true`,
+        );
+        if (!response.ok) throw new Error("Failed to fetch mentor data");
+        const data = await response.json();
+        setMentor(data);
+      } catch (error) {
+        console.error("Error fetching mentor data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMentorData();
+  }, [id]);
+
+  async function handleSubmitReview() {
+    if (!reviewComment) {
+      toast({
+        title: "Informasi tidak lengkap",
+        description: "Mohon isi komentar ulasan",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingReview(true);
+
+    try {
+      const response = await fetch("/api/v1/reviews/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mentorId: mentor?.id,
+          rating: reviewRating,
+          comment: reviewComment,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Gagal menambahkan ulasan");
+
+      toast({ title: "Berhasil", description: "Ulasan berhasil ditambahkan" });
+      setShowReviewForm(false);
+      setReviewComment("");
+      // Refresh mentor data to show the new review
+      const updatedMentor = await fetch(`/api/v1/mentors/${id}`).then((r) =>
+        r.json(),
+      );
+      setMentor(updatedMentor);
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      toast({
+        title: "Gagal menambahkan ulasan",
+        description: "Terjadi kesalahan. Silakan coba lagi.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  }
 
   const availableDates = getAvailableDates();
   const availableTimes = getAvailableTimeSlots();
@@ -71,7 +178,6 @@ export default function MentorProfilePage() {
     fetchMentorData();
   }, [id]);
 
-  if (mentor) console.log(mentor);
   async function handleBookSession() {
     if (!selectedDate || !selectedTime) {
       toast({
@@ -167,9 +273,21 @@ export default function MentorProfilePage() {
                   />
                 </div>
                 <h2 className="text-xl font-bold">{mentor.name}</h2>
-                <p className="text-muted-foreground">
-                  {mentor.expertise.join(", ")}
-                </p>
+                <div className="flex flex-col items-center">
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Expertise
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-2 ">
+                    {mentor.expertise?.map((exp, index) => (
+                      <span
+                        key={index}
+                        className="bg-primary/10 text-primary text-xs font-medium px-3 py-1 rounded-full inline-block min-w-[60px] text-center"
+                      >
+                        {exp}
+                      </span>
+                    ))}
+                  </div>
+                </div>
 
                 <div className="flex items-center mt-2">
                   <MapPin size={16} className="mr-1 text-muted-foreground" />
@@ -178,11 +296,11 @@ export default function MentorProfilePage() {
                   </span>
                 </div>
 
-                <div className="mt-4 flex space-x-2">
+                <div className="mt-4 flex flex-wrap gap-2 justify-center">
                   {mentor.interests?.slice(0, 3).map((skill, index) => (
                     <span
                       key={index}
-                      className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full"
+                      className="bg-secondary text-secondary-foreground text-xs px-3 py-1 rounded-full inline-block min-w-[60px] text-center"
                     >
                       {skill}
                     </span>
@@ -192,11 +310,17 @@ export default function MentorProfilePage() {
                 <Separator className="my-4" />
 
                 <div className="w-full">
-                  <div className="flex justify-between mb-2">
+                  <div className="flex justify-between mb-2 items-center">
                     <span>Rating</span>
-                    <span className="font-medium">
-                      {mentor.rating || "4.8"}/5
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <StarRating
+                        rating={parseFloat(mentor.rating || "4.8")}
+                        size={14}
+                      />
+                      <span className="font-medium ml-1">
+                        {mentor.rating || "4.8"}/5
+                      </span>
+                    </div>
                   </div>
                   <div className="flex justify-between">
                     <span>Sesi Selesai</span>
@@ -390,28 +514,171 @@ export default function MentorProfilePage() {
 
             <TabsContent value="reviews">
               <Card>
-                <CardHeader>
-                  <CardTitle>Ulasan Mentee</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Star className="h-5 w-5 text-primary" />
+                      Ulasan Mentee
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {mentor.reviewCount || 0} ulasan dari mentee
+                    </p>
+                  </div>
+                  {!showReviewForm && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowReviewForm(true)}
+                      className="text-sm flex items-center gap-2"
+                    >
+                      <Star className="h-4 w-4" /> Tambah Ulasan
+                    </Button>
+                  )}
                 </CardHeader>
                 <CardContent>
-                  {mentor.reviews?.length > 0 ? (
-                    <div className="space-y-4">
-                      {mentor.reviews.map((review, index) => (
-                        <div key={index} className="border-b pb-4">
-                          <div className="flex items-center">
-                            <div className="font-medium">{review.name}</div>
-                            <div className="text-xs ml-2 bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded">
-                              {review.rating}/5
+                  {showReviewForm && (
+                    <div className="mb-8 border rounded-lg p-6 bg-card shadow-sm">
+                      <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                        <Star className="h-5 w-5 text-primary" />
+                        Tambahkan Ulasan
+                      </h3>
+                      <div className="mb-6">
+                        <Label
+                          htmlFor="rating"
+                          className="block mb-2 font-medium"
+                        >
+                          Rating
+                        </Label>
+                        <div className="flex space-x-2">
+                          {[1, 2, 3, 4, 5].map((rating) => (
+                            <button
+                              key={rating}
+                              type="button"
+                              onClick={() => setReviewRating(rating)}
+                              className="p-1.5 rounded-md transition-all hover:scale-110"
+                              title={`${rating} star${rating > 1 ? "s" : ""}`}
+                            >
+                              <Star
+                                size={28}
+                                className={
+                                  reviewRating >= rating
+                                    ? "text-yellow-400 fill-yellow-400"
+                                    : "text-gray-300"
+                                }
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="mb-6">
+                        <Label
+                          htmlFor="comment"
+                          className="block mb-2 font-medium"
+                        >
+                          Komentar
+                        </Label>
+                        <Textarea
+                          id="comment"
+                          value={reviewComment}
+                          onChange={(e) => setReviewComment(e.target.value)}
+                          placeholder="Bagikan pengalaman Anda dengan mentor ini..."
+                          className="w-full min-h-[120px] resize-none focus:ring-primary"
+                          rows={4}
+                        />
+                      </div>
+                      <div className="flex space-x-3">
+                        <Button
+                          onClick={handleSubmitReview}
+                          disabled={isSubmittingReview || !reviewComment}
+                          className="px-6"
+                        >
+                          {isSubmittingReview ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent mr-2"></div>
+                              Mengirim...
+                            </>
+                          ) : (
+                            "Kirim Ulasan"
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowReviewForm(false)}
+                        >
+                          Batal
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Display existing reviews */}
+
+                  {mentor.receivedReviews &&
+                  mentor.receivedReviews.length > 0 ? (
+                    <div className="space-y-6 mt-6">
+                      {mentor.receivedReviews.map((review) => (
+                        <div
+                          key={review.id}
+                          className="border rounded-lg p-5 bg-card shadow-sm hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              {review.user?.profileImage ? (
+                                <div className="h-12 w-12 rounded-full overflow-hidden">
+                                  <Image
+                                    src={review.user.profileImage}
+                                    alt={review.user?.name || "User"}
+                                    width={48}
+                                    height={48}
+                                    className="object-cover"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-white font-semibold text-lg">
+                                  {review.user?.name?.charAt(0) || "U"}
+                                </div>
+                              )}
+                              <div>
+                                <p className="font-medium text-foreground">
+                                  {review.user?.name || "Anonymous"}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(
+                                    review.createdAt,
+                                  ).toLocaleDateString("id-ID", {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                  })}
+                                  <span className="ml-1 text-xs font-medium text-primary">
+                                    •{" "}
+                                    {formatDistanceToNow(
+                                      new Date(review.createdAt),
+                                      { addSuffix: true },
+                                    )}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+                            <div className="bg-secondary px-3 py-1.5 rounded-full">
+                              <StarRating rating={review.rating} size={16} />
                             </div>
                           </div>
-                          <div className="text-sm mt-2">{review.comment}</div>
+                          <div className="mt-4 text-sm text-card-foreground border-t pt-3">
+                            <p className="leading-relaxed">{review.comment}</p>
+                          </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground">
-                      Belum ada ulasan untuk mentor ini.
-                    </p>
+                    <div className="text-center py-10 px-6 border-2 border-dashed rounded-lg mt-6">
+                      <Star className="mx-auto h-12 w-12 text-muted-foreground/40 mb-3" />
+                      <p className="text-muted-foreground font-medium">
+                        Belum ada ulasan untuk mentor ini
+                      </p>
+                      <p className="text-sm text-muted-foreground/70 mt-1">
+                        Jadilah yang pertama memberikan ulasan
+                      </p>
+                    </div>
                   )}
                 </CardContent>
               </Card>
