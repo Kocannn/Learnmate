@@ -116,20 +116,6 @@ function AppSidebar({ pathname }: { pathname: string }) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/dashboard/reviews"}
-                >
-                  <a href="/dashboard/reviews">
-                    <Star />
-                    <span>Review Mentor</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarSeparator />
