@@ -6,7 +6,8 @@ export async function GET(
   { params }: { params: { id: string } },
 ) {
   const { id } = await params;
-
+  const url = new URL(request.url);
+  const includeReviews = url.searchParams.get("includeReviews") === "true";
   const mentor = await prisma.user.findUnique({
     where: {
       id: id,
@@ -16,6 +17,23 @@ export async function GET(
       experience: true,
       education: true,
       availability: true,
+
+      ...(includeReviews && {
+        receivedReviews: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profileImage: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      }),
     },
   });
 
