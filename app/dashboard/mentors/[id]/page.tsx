@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
+import { GenerateOrderID } from "@/lib/utils";
 
 // This function gets the next 7 days as options for booking
 const availableDates = getAvailableDates();
@@ -188,6 +189,7 @@ export default function MentorProfilePage() {
       return;
     }
 
+    const orderId = GenerateOrderID();
     setIsBooking(true);
 
     try {
@@ -207,6 +209,7 @@ export default function MentorProfilePage() {
           duration: 60, // 1 hour sessions
           topic: `Sesi dengan ${mentor?.name}`,
           notes: notes,
+          orderId: orderId,
         }),
       });
 
@@ -217,7 +220,7 @@ export default function MentorProfilePage() {
       const bookingData = await response.json();
 
       // Navigate to booking confirmation page with the booking ID
-      router.push(`/dashboard/booking/confirm?id=${bookingData.id}`);
+      router.push(`/dashboard/booking/confirm/${bookingData.id}`);
     } catch (error) {
       console.error("Error creating booking:", error);
       toast({

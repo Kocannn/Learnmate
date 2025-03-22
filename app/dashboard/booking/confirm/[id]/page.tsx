@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -27,10 +27,7 @@ import { Separator } from "@/components/ui/separator";
 
 export default function BookingConfirmPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const bookingId = searchParams.get("id");
-  console.log(searchParams);
-
+  const { id } = useParams();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -38,9 +35,25 @@ export default function BookingConfirmPage() {
     status: "idle", // idle, processing, success, error
     message: "",
   });
-
   useEffect(() => {
-    if (!bookingId) {
+    const snapScript = "https://app.sandbox.midtrans.com/snap/snap.js";
+
+    const clientKey = process.env.MIDTRANS_CLIENT_KEY || "";
+    const script = document.createElement("script");
+
+    script.src = snapScript;
+    script.async = true;
+    script.setAttribute("data-client-key", clientKey);
+    script.src = snapScript;
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+  useEffect(() => {
+    if (!id) {
       setError("Booking ID tidak ditemukan");
       setLoading(false);
       return;
@@ -48,7 +61,7 @@ export default function BookingConfirmPage() {
 
     async function fetchBookingDetails() {
       try {
-        const response = await fetch(`/api/v1/bookings/${bookingId}`);
+        const response = await fetch(`/api/v1/bookings/${id}`);
 
         if (!response.ok) {
           throw new Error("Gagal mengambil data booking");
@@ -66,8 +79,37 @@ export default function BookingConfirmPage() {
     }
 
     fetchBookingDetails();
-  }, [bookingId]);
+  }, [id]);
 
+  console.log(booking);
+  const checkoutHandler = async () => {
+    const response = await fetch("/api/v1/payment/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        price: booking?.mentor.rate,
+        orderId: booking?.id,
+      }),
+    });
+    const result = await response.json();
+    window.snap.pay(result.token, {
+      onSuccess: function (result: any) {
+        handleConfirmBooking();
+      },
+
+      onPending: function (result: any) {
+        console.log("pending");
+      },
+      onError: function (result: any) {
+        console.log("error");
+      },
+      onClose: function () {
+        console.log("closed");
+      },
+    });
+  };
   async function handleConfirmBooking() {
     if (!booking?.id) return;
 
@@ -78,18 +120,6 @@ export default function BookingConfirmPage() {
 
     try {
       // Step 1: Update booking status to confirmed
-      const bookingUpdateResponse = await fetch(
-        `/api/v1/bookings/${booking.id}/confirm`,
-        {
-          method: "PUT",
-        },
-      );
-
-      if (!bookingUpdateResponse.ok) {
-        throw new Error("Gagal mengkonfirmasi booking");
-      }
-
-      // Step 2: Create Zoom meeting
       const zoomResponse = await fetch("/api/v1/meetings/create", {
         method: "POST",
         headers: {
@@ -111,6 +141,18 @@ export default function BookingConfirmPage() {
       if (!zoomData.success) {
         throw new Error("Gagal membuat Zoom meeting");
       }
+      const bookingUpdateResponse = await fetch(
+        `/api/v1/bookings/${booking.id}/confirm`,
+        {
+          method: "PUT",
+        },
+      );
+
+      if (!bookingUpdateResponse.ok) {
+        throw new Error("Gagal mengkonfirmasi booking");
+      }
+
+      // Step 2: Create Zoom meeting
 
       setProcessingStatus({
         status: "success",
@@ -256,10 +298,7 @@ export default function BookingConfirmPage() {
 
         <CardFooter className="flex flex-col">
           {processingStatus.status === "idle" && (
-            <Button
-              className="w-full h-12 text-lg"
-              onClick={handleConfirmBooking}
-            >
+            <Button className="w-full h-12 text-lg" onClick={checkoutHandler}>
               Konfirmasi & Buat Zoom Meeting
             </Button>
           )}
