@@ -30,7 +30,6 @@ import { toast } from "@/components/ui/use-toast";
 import { GenerateOrderID } from "@/lib/utils";
 
 // This function gets the next 7 days as options for booking
-const availableDates = getAvailableDates();
 // This function gets available time slots
 function getAvailableTimeSlots() {
   return [
@@ -317,7 +316,7 @@ export default function MentorProfilePage() {
                     <span>Rating</span>
                     <div className="flex items-center gap-1">
                       <StarRating
-                        rating={parseFloat(mentor.rating || "4.8")}
+                        rating={parseFloat(mentor.rating)}
                         size={14}
                       />
                       <span className="font-medium ml-1">
@@ -413,7 +412,7 @@ export default function MentorProfilePage() {
                                             new Date(),
                                           ),
                                           "EEEE",
-                                          { locale: id },
+                                          { locale: id as Locale },
                                         );
                                       } catch (error) {
                                         // Fallback to simple day name if formatting fails
@@ -435,7 +434,7 @@ export default function MentorProfilePage() {
                                             new Date(),
                                           ),
                                           "dd MMM",
-                                          { locale: id },
+                                          { locale: id as Locale },
                                         );
                                       } catch (error) {
                                         return new Date(
