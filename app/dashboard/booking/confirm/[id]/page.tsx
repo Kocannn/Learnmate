@@ -98,16 +98,6 @@ export default function BookingConfirmPage() {
       onSuccess: function () {
         handleConfirmBooking();
       },
-
-      onPending: function () {
-        console.log("pending");
-      },
-      onError: function () {
-        console.log("error");
-      },
-      onClose: function () {
-        console.log("closed");
-      },
     });
   };
   async function handleConfirmBooking() {
