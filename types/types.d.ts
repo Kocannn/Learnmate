@@ -1,4 +1,7 @@
 declare global {
+  interface Window {
+    snap: any;
+  }
   type Booking = {
     id: string;
     mentorId: string;
