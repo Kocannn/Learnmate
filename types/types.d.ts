@@ -48,6 +48,25 @@ declare global {
     years: number;
   };
 
+  type review = {
+    id: string;
+    bookingId: string;
+    mentorId: string;
+    studentId: string;
+    rating: number;
+    review: string;
+    createdAt: string;
+    updatedAt: string;
+    student: {
+      id: string;
+      name: string;
+      email: string;
+      profileImage: string;
+    };
+    user: User;
+    comment: string;
+  };
+
   type User = {
     id: string;
     name: string;
@@ -71,10 +90,12 @@ declare global {
     mentorCount: number;
     password: string;
     rate: number;
-    rating: number;
+    rating: string;
     reviewCount: number;
     totalHours: number;
     updatedAt: string;
+    sessionsCompleted: string;
+    receivedReviews: review[];
   };
 }
 
