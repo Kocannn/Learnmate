@@ -17,6 +17,9 @@ export async function POST(req: Request) {
       order_id: orderId,
       gross_amount: price,
     },
+    callbacks: {
+      finish: "localhost:3000/dashboard",
+    },
   };
 
   const token = await snap.createTransactionToken(parameter);
