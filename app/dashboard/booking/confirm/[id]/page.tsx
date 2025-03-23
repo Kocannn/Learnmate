@@ -37,22 +37,26 @@ export default function BookingConfirmPage() {
   });
   useEffect(() => {
     const snapScript = "https://app.sandbox.midtrans.com/snap/snap.js";
+    const clientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
 
-    const clientKey = process.env.MIDTRANS_CLIENT_KEY || "";
+    if (!clientKey) {
+      console.error(
+        "Midtrans client key is not defined in environment variables",
+      );
+      setError(
+        "Configuration error: Payment gateway is not properly configured",
+      );
+      setLoading(false);
+      return;
+    }
+
     const script = document.createElement("script");
-
     script.src = snapScript;
-    script.async = true;
     script.setAttribute("data-client-key", clientKey);
-    script.src = snapScript;
-    script.async = true;
+    script.type = "text/javascript";
+
     document.body.appendChild(script);
 
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-  useEffect(() => {
     if (!id) {
       setError("Booking ID tidak ditemukan");
       setLoading(false);
@@ -69,7 +73,6 @@ export default function BookingConfirmPage() {
 
         const data = await response.json();
         setBooking(data);
-        console.log(data);
       } catch (err) {
         setError("Terjadi kesalahan saat memuat detail booking");
         console.error(err);
@@ -79,9 +82,8 @@ export default function BookingConfirmPage() {
     }
 
     fetchBookingDetails();
-  }, [id]);
+  }, []);
 
-  console.log(booking);
   const checkoutHandler = async () => {
     const response = await fetch("/api/v1/payment/token", {
       method: "POST",
@@ -95,22 +97,33 @@ export default function BookingConfirmPage() {
     });
     const result = await response.json();
     window.snap.pay(result.token, {
-      onSuccess: function () {
+      onSuccess: function (result: any) {
         handleConfirmBooking();
+      },
+
+      onPending: function (result: any) {
+        console.log("pending");
+      },
+      onError: function (result: any) {
+        console.log("error");
+      },
+      onClose: function () {
+        console.log("closed");
       },
     });
   };
-  async function handleConfirmBooking() {
-    if (!booking?.id) return;
+  // Create Zoom meeting and confirm booking status using Promise.all
+  async function createZoomAndConfirmBooking() {
+    if (!booking?.id) return false;
 
     setProcessingStatus({
       status: "processing",
-      message: "Memproses pembayaran dan membuat sesi...",
+      message: "Membuat Zoom meeting dan mengkonfirmasi booking...",
     });
 
     try {
-      // Step 1: Update booking status to confirmed
-      const zoomResponse = await fetch("/api/v1/meetings/create", {
+      // Prepare Zoom meeting creation request
+      const createZoomPromise = fetch("/api/v1/meetings/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,43 +134,83 @@ export default function BookingConfirmPage() {
           studentId: booking.studentId,
           topic:
             booking.topic || `Sesi Mentoring dengan ${booking.mentor.name}`,
-          startTime: booking.date, // Assuming date is stored in ISO format
+          startTime: booking.date,
           duration: booking.duration || 60,
         }),
       });
 
-      const zoomData = await zoomResponse.json();
-
-      if (!zoomData.success) {
-        throw new Error("Gagal membuat Zoom meeting");
-      }
-      const bookingUpdateResponse = await fetch(
+      // Prepare booking confirmation request
+      const confirmBookingPromise = fetch(
         `/api/v1/bookings/${booking.id}/confirm`,
         {
           method: "PUT",
         },
       );
 
+      // Execute both requests in parallel
+      const [zoomResponse, bookingUpdateResponse] = await Promise.all([
+        createZoomPromise,
+        confirmBookingPromise,
+      ]);
+
+      // Parse and validate zoom response
+      const zoomData = await zoomResponse.json();
+      if (!zoomData.success) {
+        throw new Error("Gagal membuat Zoom meeting");
+      }
+
+      // Validate booking update response
       if (!bookingUpdateResponse.ok) {
         throw new Error("Gagal mengkonfirmasi booking");
       }
 
-      // Step 2: Create Zoom meeting
-
-      setProcessingStatus({
-        status: "success",
-        message: "Booking berhasil dikonfirmasi dan Zoom meeting telah dibuat!",
-      });
-
-      // Wait 2 seconds before redirecting for better UX
-      setTimeout(() => {
-        router.push(`/dashboard/meetings/${booking.id}`);
-      }, 2000);
+      return true;
     } catch (err) {
-      console.error("Error confirming booking:", err);
+      console.error("Error in confirmation process:", err);
       setProcessingStatus({
         status: "error",
-        message: "Terjadi kesalahan saat mengkonfirmasi booking.",
+        message:
+          "Terjadi kesalahan saat membuat Zoom meeting atau mengkonfirmasi booking.",
+      });
+      return false;
+    }
+  }
+
+  // Handle success and redirect
+  function handleSuccess() {
+    setProcessingStatus({
+      status: "success",
+      message: "Booking berhasil dikonfirmasi dan Zoom meeting telah dibuat!",
+    });
+
+    // Wait before redirecting for better UX
+    setTimeout(() => {
+      router.push(`/dashboard/meetings/${booking?.id}`);
+    }, 1500);
+  }
+
+  // Main function that coordinates the flow
+  async function handleConfirmBooking() {
+    if (!booking?.id) return;
+
+    setProcessingStatus({
+      status: "processing",
+      message: "Memproses pembayaran dan membuat sesi...",
+    });
+
+    try {
+      // Combined step: Create Zoom and confirm booking
+      const success = await createZoomAndConfirmBooking();
+
+      if (success) {
+        // Handle success and redirect
+        handleSuccess();
+      }
+    } catch (err) {
+      console.error("Error in confirmation process:", err);
+      setProcessingStatus({
+        status: "error",
+        message: "Terjadi kesalahan selama proses konfirmasi.",
       });
     }
   }
