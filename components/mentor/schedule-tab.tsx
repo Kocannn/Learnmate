@@ -14,6 +14,14 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Carousel,
   CarouselContent,
   CarouselItem,
@@ -34,24 +42,30 @@ function getAvailableTimeSlots() {
 
 interface ScheduleTabProps {
   mentor: any; // Replace with proper type
-  onSchedule: (date: string, time: string, notes: string) => Promise<void>;
+  onSchedule: (
+    date: string,
+    time: string,
+    topic: string,
+    notes: string,
+  ) => Promise<void>;
   isBooking: boolean;
 }
 
 export function ScheduleTab({
-  mentor,
   onSchedule,
   isBooking,
+  mentor,
 }: ScheduleTabProps) {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [topic, setTopic] = useState("");
   const [notes, setNotes] = useState("");
 
   const availableDates = getAvailableDates();
   const availableTimes = getAvailableTimeSlots();
 
   const handleBookSession = () => {
-    onSchedule(selectedDate, selectedTime, notes);
+    onSchedule(selectedDate, selectedTime, topic, notes);
   };
 
   return (
@@ -152,13 +166,39 @@ export function ScheduleTab({
           </div>
 
           <div>
+            <Label className="text-base">
+              Pilih Topik <span className="text-red-500">*</span>
+            </Label>
+            <Select value={topic} onValueChange={setTopic}>
+              <SelectTrigger className="w-full mt-2">
+                <SelectValue placeholder="Pilih topik sesi mentoring" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {mentor.expertise?.map((skill: string) => (
+                    <SelectItem key={skill} value={skill}>
+                      {skill}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Topik akan digunakan sebagai judul meeting Zoom
+            </p>
+          </div>
+          <div>
             <Label className="text-base">Catatan (Opsional)</Label>
             <Textarea
-              placeholder="Jelaskan topik yang ingin dibahas dalam sesi"
+              placeholder="Jelaskan lebih detail tentang topik yang ingin dibahas dalam sesi"
               className="mt-2"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
+            <p className="text-xs text-muted-foreground mt-1">
+              Berikan informasi spesifik tentang apa yang ingin didiskusikan
+              dalam sesi
+            </p>
           </div>
         </div>
       </CardContent>
@@ -166,7 +206,7 @@ export function ScheduleTab({
         <Button
           className="w-full h-12"
           onClick={handleBookSession}
-          disabled={!selectedDate || !selectedTime || isBooking}
+          disabled={!selectedDate || !selectedTime || !topic || isBooking}
         >
           {isBooking ? (
             <>
