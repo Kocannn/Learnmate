@@ -23,10 +23,12 @@ export default function ProfilePage() {
   const [showAddEducation, setShowAddEducation] = useState(false);
   const [showAddExperience, setShowAddExperience] = useState(false);
   const [user, setUser] = useState<user | null>(null);
+  const [formData, setFormData] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (session) {
-      setUser({
+      const userData = {
         id: session.user.id,
         name: session.user.name,
         email: session.user.email,
@@ -48,11 +50,12 @@ export default function ProfilePage() {
         rate: session.user.rate,
         rating: session.user.rating,
         reviewCount: session.user.reviewCount,
-      });
+      };
+      setUser(userData);
+      setFormData(userData);
       setUserType(session.user.isMentor ? "mentor" : "mentee");
     }
   }, [session]);
-
   // Sample user data
   const userData = {
     name: "Andi Wijaya",
@@ -95,6 +98,32 @@ export default function ProfilePage() {
   };
 
   console.log(user);
+
+  const handleSaveProfile = async () => {
+    if (!formData) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/v1/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) throw new Error("Failed to update profile");
+
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      setEditMode(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -113,6 +142,10 @@ export default function ProfilePage() {
           userType={userType}
           editMode={editMode}
           setEditMode={setEditMode}
+          formData={formData}
+          setFormData={setFormData}
+          isSubmitting={isSubmitting}
+          onSave={handleSaveProfile}
         />
 
         {/* Main Content */}
@@ -136,6 +169,8 @@ export default function ProfilePage() {
                 userData={userData}
                 userType={userType}
                 editMode={editMode}
+                formData={formData}
+                setFormData={setFormData}
                 setShowAddEducation={setShowAddEducation}
                 setShowAddExperience={setShowAddExperience}
               />

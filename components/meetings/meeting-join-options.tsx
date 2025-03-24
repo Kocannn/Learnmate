@@ -44,9 +44,6 @@ export function MeetingJoinOptions({
       const meetingNumber = urlMatch[1];
       const password = urlMatch[2] || "";
 
-      console.log("Meeting number:", meetingNumber);
-      console.log("Password:", password);
-
       // Redirect to the browser version
       const browserUrl = `https://zoom.us/wc/${meetingNumber}/join?pwd=${password}`;
       window.open(browserUrl, "_blank");

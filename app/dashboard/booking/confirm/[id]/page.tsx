@@ -97,18 +97,8 @@ export default function BookingConfirmPage() {
     });
     const result = await response.json();
     window.snap.pay(result.token, {
-      onSuccess: function (result: any) {
+      onSuccess: function () {
         handleConfirmBooking();
-      },
-
-      onPending: function (result: any) {
-        console.log("pending");
-      },
-      onError: function (result: any) {
-        console.log("error");
-      },
-      onClose: function () {
-        console.log("closed");
       },
     });
   };

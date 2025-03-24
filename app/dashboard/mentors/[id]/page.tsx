@@ -83,6 +83,7 @@ export default function MentorProfilePage() {
   async function handleBookSession(
     selectedDate: string,
     selectedTime: string,
+    topic: string,
     notes: string,
   ) {
     if (!selectedDate || !selectedTime) {
@@ -93,10 +94,17 @@ export default function MentorProfilePage() {
       });
       return;
     }
+    if (!topic) {
+      toast({
+        title: "Informasi tidak lengkap",
+        description: "Mohon pilih topik untuk sesi mentoring",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const orderId = GenerateOrderID();
     setIsBooking(true);
-
     try {
       // Format date for the API
       const sessionDateTime = `${selectedDate}T${selectedTime}`;
@@ -112,12 +120,11 @@ export default function MentorProfilePage() {
           date: sessionDateTime,
           time: selectedTime.slice(0, 5), // Extract HH:MM format from selectedTime
           duration: 60, // 1 hour sessions
-          topic: `Sesi dengan ${mentor?.name}`,
+          topic: topic,
           notes: notes,
           orderId: orderId,
         }),
       });
-
       if (!response.ok) {
         throw new Error("Gagal membuat booking");
       }
