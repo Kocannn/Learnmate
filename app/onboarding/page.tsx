@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
 import { X, Plus, ChevronLeft, ChevronRight, Upload } from "lucide-react";
-
 import {
   Card,
   CardContent,
@@ -852,6 +851,7 @@ export default function OnboardingPage() {
                   type="button"
                   onClick={() => {
                     onSubmit(getValues());
+                    router.push("/dashboard");
                   }}
                 >
                   Complete Profile
