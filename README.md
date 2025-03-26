@@ -165,6 +165,35 @@ Mengkonfirmasi booking tertentu.
 }
 ```
 
+### Reviews API
+
+#### `POST /api/v1/reviews/create`
+
+Membuat ulasan baru untuk mentor.
+
+**Request**:
+
+```json
+{
+  "mentorId": "clg2u3jk50000v9qt7s8j3l5a",
+  "rating": 4.5,
+  "comment": "Mentor sangat membantu dalam menjelaskan konsep dasar JavaScript"
+}
+```
+
+**Response**:
+
+```json
+{
+  "id": "clg2u3jk50001v9qt7s8j3l5d",
+  "mentorId": "clg2u3jk50000v9qt7s8j3l5a",
+  "userId": "clg2u3jk50000v9qt7s8j3l5c",
+  "rating": 4.5,
+  "comment": "Mentor sangat membantu dalam menjelaskan konsep dasar JavaScript",
+  "createdAt": "2023-06-16T13:00:00Z"
+}
+```
+
 ### Meeting API
 
 #### `POST /api/v1/meetings/create`
@@ -231,6 +260,15 @@ Membuat Zoom meeting untuk booking.
 - `zoomJoinUrl`: Text
 - `zoomStartUrl`: Text
 - `zoomPassword`: String
+
+### Review
+
+- `id`: String (Primary Key)
+- `mentorId`: String (Foreign Key)
+- `userId`: String (Foreign Key)
+- `rating`: Float
+- `comment`: Text
+- `createdAt`: DateTime
 
 ### Experience
 
