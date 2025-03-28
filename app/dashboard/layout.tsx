@@ -4,17 +4,7 @@ import type React from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { usePathname } from "next/navigation";
-import {
-  BookOpen,
-  Calendar,
-  CreditCard,
-  Home,
-  LogOut,
-  Search,
-  Settings,
-  Star,
-  User,
-} from "lucide-react";
+import { Calendar, Home, LogOut, Search, Settings, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
