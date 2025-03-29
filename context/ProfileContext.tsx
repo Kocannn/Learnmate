@@ -11,6 +11,21 @@ import { useSession } from "next-auth/react";
 import { User } from "next-auth";
 import { formatDate } from "@/lib/utils";
 
+// Define types for education and experience
+interface Education {
+  institution: string;
+  degree: string;
+  year: string;
+}
+
+interface Experience {
+  company: string;
+  position: string;
+  duration: string;
+}
+
+// Extend the Next-Auth user type to include our custom fields
+
 type UserType = "mentor" | "mentee";
 
 interface ProfileContextType {
@@ -19,6 +34,8 @@ interface ProfileContextType {
   userType: UserType;
   editMode: boolean;
   formData: any;
+  userUi: User | null;
+  setUserUi: (value: any) => void;
   isSubmitting: boolean;
   showAddEducation: boolean;
   showAddExperience: boolean;
@@ -27,6 +44,7 @@ interface ProfileContextType {
   setShowAddEducation: (value: boolean) => void;
   setShowAddExperience: (value: boolean) => void;
   handleSaveProfile: () => Promise<void>;
+  handleAddEducation: (educationData: Education) => void;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -38,6 +56,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [showAddEducation, setShowAddEducation] = useState(false);
   const [showAddExperience, setShowAddExperience] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [userUi, setUserUi] = useState<User | null>(null);
   const [formData, setFormData] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -65,8 +84,11 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         rate: session.user.rate,
         rating: session.user.rating,
         reviewCount: session.user.reviewCount,
+        education: session.user.education,
+        experience: session.user.experience,
       };
       setUser(userData);
+      setUserUi(userData);
       setFormData(userData);
       setUserType(session.user.isMentor ? "mentor" : "mentee");
     }
@@ -89,18 +111,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     rating: 4.8,
     reviewCount: 25,
     // Add education array
-    education: [
-      {
-        institution: "Universitas Indonesia",
-        degree: "S1 Ilmu Komputer",
-        year: "2016 - 2020",
-      },
-      {
-        institution: "Institut Teknologi Bandung",
-        degree: "S2 Teknik Informatika",
-        year: "2021 - 2023",
-      },
-    ],
+    education: [],
     // Add experience array for mentor profile
     experience: [
       {
@@ -132,8 +143,53 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     ],
   };
 
+  // Helper function to check if formData has actual changes compared to user data
+  const hasChanges = () => {
+    if (!user || !formData) return false;
+
+    // Get the keys that exist in both objects
+    const keys = Object.keys(formData).filter(
+      (key) =>
+        formData[key] !== undefined &&
+        user[key as keyof typeof user] !== undefined,
+    );
+
+    // Check if any values are different
+    for (const key of keys) {
+      if (
+        JSON.stringify(formData[key]) !==
+        JSON.stringify(user[key as keyof typeof user])
+      ) {
+        return true; // Found a change
+      }
+    }
+
+    return false; // No changes found
+  };
+
+  const handleAddEducation = async (educationData: Education) => {
+    if (!formData) return;
+
+    // Add the new education data to the form data state
+    setFormData((prevFormData: any) => ({
+      ...prevFormData,
+      education: [...(prevFormData.education || []), educationData],
+    }));
+    setUserUi((prevUiData: any) => ({
+      ...prevUiData,
+      education: [...(prevUiData.education || []), educationData],
+    }));
+  };
+
   const handleSaveProfile = async () => {
     if (!formData) return;
+
+    // Check if there are actual changes before making the API call
+    if (!hasChanges()) {
+      console.log("No changes detected in profile data, skipping API call");
+      setEditMode(false);
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -148,6 +204,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       if (!response.ok) throw new Error("Failed to update profile");
 
       const updatedUser = await response.json();
+      console.log("Profile updated successfully:", updatedUser);
       setUser(updatedUser);
       setEditMode(false);
     } catch (error) {
@@ -164,12 +221,15 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         userData,
         userType,
         editMode,
+        userUi,
+        setUserUi,
         formData,
         isSubmitting,
         showAddEducation,
         showAddExperience,
         setEditMode,
         setFormData,
+        handleAddEducation,
         setShowAddEducation,
         setShowAddExperience,
         handleSaveProfile,
