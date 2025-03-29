@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 interface EducationSectionProps {
   userData: any;
   editMode: boolean;
+  formData: any;
   setShowAddEducation: (show: boolean) => void;
 }
 
@@ -39,8 +40,8 @@ export default function EducationSection({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {userData.education &&
-            userData.education.map(
+          {userData?.education &&
+            userData?.education.map(
               (
                 edu: { institution: string; degree: string; year: string },
                 index: number,
@@ -70,7 +71,7 @@ export default function EducationSection({
               ),
             )}
 
-          {userData.education.length === 0 && (
+          {userData?.education?.length === 0 && (
             <div className="text-center py-4">
               <GraduationCap className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">
