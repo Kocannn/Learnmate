@@ -26,13 +26,15 @@ export default function AddEducationDialog({
   onOpenChange,
   onSubmit,
 }: AddEducationDialogProps) {
-  const [institution, setInstitution] = useState("");
-  const [degree, setDegree] = useState("");
-  const [year, setYear] = useState("");
+  const [data, setData] = useState({
+    institution: "",
+    degree: "",
+    year: "",
+  });
 
   const handleSubmit = () => {
     if (onSubmit) {
-      onSubmit({ institution, degree, year });
+      onSubmit(data);
     }
     onOpenChange(false);
   };
@@ -53,8 +55,10 @@ export default function AddEducationDialog({
               id="institution"
               placeholder="Nama universitas atau institusi"
               className="mt-1"
-              value={institution}
-              onChange={(e) => setInstitution(e.target.value)}
+              value={data.institution}
+              onChange={(e) =>
+                setData({ ...data, institution: e.target.value })
+              }
             />
           </div>
           <div>
@@ -63,8 +67,8 @@ export default function AddEducationDialog({
               id="degree"
               placeholder="Contoh: S1 Ilmu Komputer"
               className="mt-1"
-              value={degree}
-              onChange={(e) => setDegree(e.target.value)}
+              value={data.degree}
+              onChange={(e) => setData({ ...data, degree: e.target.value })}
             />
           </div>
           <div>
@@ -73,8 +77,8 @@ export default function AddEducationDialog({
               id="year"
               placeholder="Contoh: 2020 - 2024"
               className="mt-1"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
+              value={data.year}
+              onChange={(e) => setData({ ...data, year: e.target.value })}
             />
           </div>
         </div>
@@ -82,7 +86,18 @@ export default function AddEducationDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Batal
           </Button>
-          <Button onClick={handleSubmit}>Simpan</Button>
+          <Button
+            onClick={() => {
+              handleSubmit();
+              setData({
+                institution: "",
+                degree: "",
+                year: "",
+              });
+            }}
+          >
+            Simpan
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

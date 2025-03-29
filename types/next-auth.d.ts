@@ -23,7 +23,23 @@ declare module "next-auth" {
       rate?: number;
       rating?: number | null;
       reviewCount?: number;
+      education?: Education[];
+      experience?: Experience[];
     };
+  }
+
+  interface Education {
+    institution: string;
+    degree: string;
+    year: string;
+  }
+
+  interface Experience {
+    company: string;
+    position: string;
+    startDate: string;
+    endDate: string;
+    description: string;
   }
 
   interface User {
@@ -43,6 +59,8 @@ declare module "next-auth" {
     mentorCount?: number;
     isMentor?: boolean;
     expertise?: string[] | null;
+    education?: Education[];
+    experience?: Experience[];
     rate?: number;
     rating?: number | null;
     reviewCount?: number;

@@ -13,11 +13,15 @@ import { ProfileProvider, useProfile } from "@/context/ProfileContext";
 // Wrapper component yang menggunakan context
 function ProfilePageContent() {
   const {
+    user,
+    handleAddEducation,
+    formData,
     userData,
     userType,
     editMode,
     showAddEducation,
     showAddExperience,
+    setFormData,
     setShowAddEducation,
     setShowAddExperience,
   } = useProfile();
@@ -88,8 +92,7 @@ function ProfilePageContent() {
         open={showAddEducation}
         onOpenChange={setShowAddEducation}
         onSubmit={(education) => {
-          // Add logic to update education data
-          console.log("New education:", education);
+          handleAddEducation(education);
         }}
       />
 
