@@ -25,6 +25,7 @@ export async function PUT(request: Request) {
       data: {
         location: data.location,
         bio: data.bio,
+        interests: data.interests,
       },
     });
 
