@@ -60,7 +60,7 @@ function ProfilePageContent() {
 
             {/* Account Tab */}
             <TabsContent value="account">
-              <AccountTab userData={userData} userType={userType} />
+              <AccountTab userData={user} userType={userType} />
             </TabsContent>
 
             {/* Availability Tab (Mentor Only) */}
