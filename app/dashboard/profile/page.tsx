@@ -15,13 +15,11 @@ function ProfilePageContent() {
   const {
     user,
     handleAddEducation,
-    formData,
     userData,
     userType,
     editMode,
     showAddEducation,
     showAddExperience,
-    setFormData,
     setShowAddEducation,
     setShowAddExperience,
   } = useProfile();
