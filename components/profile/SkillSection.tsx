@@ -1,4 +1,4 @@
-import { Plus, X } from "lucide-react";
+import { X } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -6,12 +6,13 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface SkillsSectionProps {
   userData: any;
-  userType: string;
+  userType: "mentor" | "mentee";
   editMode: boolean;
 }
 
@@ -24,53 +25,51 @@ export default function SkillsSection({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>{userType === "mentor" ? "Keahlian" : "Minat"}</CardTitle>
+          <CardTitle>Keahlian</CardTitle>
           <CardDescription>
             {userType === "mentor"
-              ? "Bidang keahlian yang Anda kuasai"
-              : "Bidang yang Anda minati untuk dipelajari"}
+              ? "Keahlian yang Anda ajarkan"
+              : "Keahlian yang ingin Anda pelajari"}
           </CardDescription>
         </div>
       </CardHeader>
       <CardContent>
-        {editMode ? (
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              {(userType === "mentor"
-                ? userData.expertise
-                : userData.interests
-              ).map((item: string, index: number) => (
-                <Badge
-                  key={index}
-                  variant="secondary"
-                  className="flex items-center gap-1 px-3 py-1.5"
-                >
-                  {item}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-4 w-4 p-0 ml-1"
+        <div className="flex flex-wrap gap-2 mt-2">
+          {/* Add proper null check and handle both undefined and empty array cases */}
+          {userData && userData.skills && userData.skills.length > 0 ? (
+            userData.skills.map((skill: string, index: number) => (
+              <Badge
+                key={`skill-${index}`}
+                variant="outline"
+                className="px-3 py-1"
+              >
+                {skill}
+                {editMode && (
+                  <button
+                    className="ml-2 text-muted-foreground hover:text-foreground"
+                    onClick={() => {
+                      // Handle remove skill logic would go here
+                      console.log("Remove skill:", skill);
+                    }}
                   >
                     <X className="h-3 w-3" />
-                  </Button>
-                </Badge>
-              ))}
-              <Button variant="outline" size="sm" className="rounded-full">
-                <Plus className="h-4 w-4 mr-1" />
-                Tambah
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {(userType === "mentor"
-              ? userData.expertise
-              : userData.interests
-            ).map((item: string, index: number) => (
-              <Badge key={index} variant="secondary">
-                {item}
+                  </button>
+                )}
               </Badge>
-            ))}
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Belum ada keahlian yang ditambahkan
+            </p>
+          )}
+        </div>
+
+        {editMode && (
+          <div className="mt-4 flex gap-2">
+            <Input placeholder="Tambahkan keahlian" className="flex-1" />
+            <Button variant="outline" size="sm">
+              Tambah
+            </Button>
           </div>
         )}
       </CardContent>

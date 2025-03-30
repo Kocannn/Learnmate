@@ -70,6 +70,8 @@ export const authOptions: NextAuthOptions = {
             rate: true,
             rating: true,
             reviewCount: true,
+            education: true, // Tambahkan field education
+            experience: true, // Tambahkan field experience
           },
         });
 

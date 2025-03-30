@@ -21,10 +21,7 @@ interface PreferencesTabProps {
   isMentor?: boolean;
 }
 
-export default function PreferencesTab({
-  userData,
-  isMentor,
-}: PreferencesTabProps) {
+export default function PreferencesTab({ isMentor }: PreferencesTabProps) {
   return (
     <div className="mt-4 space-y-6">
       <Card>

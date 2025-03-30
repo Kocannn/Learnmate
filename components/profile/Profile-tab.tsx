@@ -1,4 +1,3 @@
-import { Plus, X, GraduationCap, Trash, UserCircle } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -9,29 +8,23 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import EducationSection from "./EducationSection";
 import ExperienceSection from "./ExperienceSection";
 import SkillsSection from "./SkillSection";
+import { useProfile } from "@/context/ProfileContext";
 
-export interface ProfileTabProps {
-  user: any;
-  userData: any;
-  userType: string;
-  editMode: boolean;
-  setShowAddEducation: (show: boolean) => void;
-  setShowAddExperience: (show: boolean) => void;
-}
+export default function ProfileTab() {
+  const {
+    user,
+    userType,
+    editMode,
+    formData,
+    userUi,
+    setFormData,
+    setShowAddEducation,
+    setShowAddExperience,
+  } = useProfile();
 
-export default function ProfileTab({
-  user,
-  userData,
-  userType,
-  editMode,
-  setShowAddEducation,
-  setShowAddExperience,
-}: ProfileTabProps) {
   return (
     <div className="mt-4 space-y-6">
       <Card>
@@ -47,7 +40,17 @@ export default function ProfileTab({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Nama Lengkap</Label>
-                  <Input id="name" defaultValue={user?.name} className="mt-1" />
+                  <Input
+                    id="name"
+                    defaultValue={user?.name}
+                    className="mt-1"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value !== user?.name) {
+                        setFormData({ ...formData, name: value });
+                      }
+                    }}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="location">Lokasi</Label>
@@ -55,6 +58,12 @@ export default function ProfileTab({
                     id="location"
                     defaultValue={user?.location}
                     className="mt-1"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value !== user?.location) {
+                        setFormData({ ...formData, location: value });
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -65,6 +74,12 @@ export default function ProfileTab({
                   id="bio"
                   className="mt-1 min-h-[120px]"
                   defaultValue={user?.bio}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value !== user?.bio) {
+                      setFormData({ ...formData, bio: value });
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -78,24 +93,21 @@ export default function ProfileTab({
       </Card>
 
       <EducationSection
-        userData={userData}
+        formData={formData}
+        userData={userUi}
         editMode={editMode}
         setShowAddEducation={setShowAddEducation}
       />
 
       {userType === "mentor" && (
         <ExperienceSection
-          userData={userData}
+          userData={user}
           editMode={editMode}
           setShowAddExperience={setShowAddExperience}
         />
       )}
 
-      <SkillsSection
-        userData={userData}
-        userType={userType}
-        editMode={editMode}
-      />
+      <SkillsSection userData={user} userType={userType} editMode={editMode} />
     </div>
   );
 }
