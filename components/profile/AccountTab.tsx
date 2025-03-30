@@ -1,4 +1,4 @@
-import { CreditCard, Lock, Plus } from "lucide-react";
+import { Lock } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 
 interface AccountTabProps {
   userData: any;
@@ -75,68 +74,6 @@ export default function AccountTab({ userData, userType }: AccountTabProps) {
           </div>
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Metode Pembayaran</CardTitle>
-          <CardDescription>Kelola metode pembayaran Anda</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex items-center">
-              <CreditCard className="h-5 w-5 mr-3 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Visa •••• 4242</p>
-                <p className="text-xs text-muted-foreground">Expires 12/2025</p>
-              </div>
-            </div>
-            <Badge>Default</Badge>
-          </div>
-
-          <Button variant="outline">
-            <Plus className="h-4 w-4 mr-2" />
-            Tambah Metode Pembayaran
-          </Button>
-        </CardContent>
-      </Card>
-
-      {userType === "mentor" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Informasi Pembayaran</CardTitle>
-            <CardDescription>
-              Informasi untuk menerima pembayaran dari sesi mentoring
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="bank">Nama Bank</Label>
-              <Input
-                id="bank"
-                defaultValue="Bank Central Asia (BCA)"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="account-number">Nomor Rekening</Label>
-              <Input
-                id="account-number"
-                defaultValue="1234567890"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="account-name">Nama Pemilik Rekening</Label>
-              <Input
-                id="account-name"
-                defaultValue={userData.name}
-                className="mt-1"
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle className="text-destructive">Hapus Akun</CardTitle>
