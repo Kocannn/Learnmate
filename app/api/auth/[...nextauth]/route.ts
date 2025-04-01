@@ -49,7 +49,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         // Ambil data terbaru dari database berdasarkan email pengguna
         const updatedUser = await prisma.user.findUnique({
-          where: { email: session.user.email },
+          where: { email: (session.user.email as string) || undefined },
           select: {
             id: true,
             name: true,

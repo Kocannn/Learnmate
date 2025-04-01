@@ -9,18 +9,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 interface SkillsSectionProps {
   userData: any;
   userType: "mentor" | "mentee";
   editMode: boolean;
+  handleAddInterests: (interests: string[]) => void;
 }
 
 export default function SkillsSection({
   userData,
   userType,
   editMode,
+  handleAddInterests,
 }: SkillsSectionProps) {
+  const [skills, setSkills] = useState<string[]>([]);
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -36,8 +40,8 @@ export default function SkillsSection({
       <CardContent>
         <div className="flex flex-wrap gap-2 mt-2">
           {/* Add proper null check and handle both undefined and empty array cases */}
-          {userData && userData.skills && userData.skills.length > 0 ? (
-            userData.skills.map((skill: string, index: number) => (
+          {userData && userData.interests && userData.interests.length > 0 ? (
+            userData.interests.map((skill: string, index: number) => (
               <Badge
                 key={`skill-${index}`}
                 variant="outline"
@@ -66,8 +70,31 @@ export default function SkillsSection({
 
         {editMode && (
           <div className="mt-4 flex gap-2">
-            <Input placeholder="Tambahkan keahlian" className="flex-1" />
-            <Button variant="outline" size="sm">
+            <Input
+              placeholder="Tambahkan keahlian"
+              className="flex-1"
+              value={skills.join(", ")}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value !== skills.join(", ")) {
+                  setSkills(value.split(", ").filter((skill) => skill));
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAddInterests(skills);
+                  setSkills([]);
+                }
+              }}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                handleAddInterests(skills);
+                setSkills([]);
+              }}
+            >
               Tambah
             </Button>
           </div>

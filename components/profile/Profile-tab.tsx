@@ -20,6 +20,7 @@ export default function ProfileTab() {
     editMode,
     formData,
     userUi,
+    handleAddInterests,
     setFormData,
     setShowAddEducation,
     setShowAddExperience,
@@ -107,7 +108,12 @@ export default function ProfileTab() {
         />
       )}
 
-      <SkillsSection userData={user} userType={userType} editMode={editMode} />
+      <SkillsSection
+        userData={userUi}
+        userType={userType}
+        editMode={editMode}
+        handleAddInterests={handleAddInterests}
+      />
     </div>
   );
 }

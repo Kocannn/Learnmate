@@ -18,12 +18,6 @@ interface Education {
   year: string;
 }
 
-interface Experience {
-  company: string;
-  position: string;
-  duration: string;
-}
-
 // Extend the Next-Auth user type to include our custom fields
 
 type UserType = "mentor" | "mentee";
@@ -45,6 +39,7 @@ interface ProfileContextType {
   setShowAddExperience: (value: boolean) => void;
   handleSaveProfile: () => Promise<void>;
   handleAddEducation: (educationData: Education) => void;
+  handleAddInterests: (interests: string[]) => void;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -166,6 +161,19 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
     return false; // No changes found
   };
+  const handleAddInterests = async (interests: string[]) => {
+    if (!formData) return;
+
+    // Add the new interests to the form data state
+    setFormData((prevFormData: any) => ({
+      ...prevFormData,
+      interests: [...(prevFormData.interests || []), ...interests],
+    }));
+    setUserUi((prevUiData: any) => ({
+      ...prevUiData,
+      interests: [...(prevUiData.interests || []), ...interests],
+    }));
+  };
 
   const handleAddEducation = async (educationData: Education) => {
     if (!formData) return;
@@ -229,6 +237,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         showAddExperience,
         setEditMode,
         setFormData,
+        handleAddInterests,
         handleAddEducation,
         setShowAddEducation,
         setShowAddExperience,
