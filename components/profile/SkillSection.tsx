@@ -73,7 +73,7 @@ export default function SkillsSection({
             <Input
               placeholder="Tambahkan keahlian"
               className="flex-1"
-              value={skills}
+              value={skills.join(", ")}
               onChange={(e) => {
                 const value = e.target.value;
                 if (value !== skills.join(", ")) {
