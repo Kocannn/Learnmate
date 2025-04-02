@@ -5,6 +5,10 @@ export interface Mentor {
   expertise?: string;
   rate?: number;
 }
+export interface Student {
+  id: string;
+  name: string;
+}
 
 export interface Booking {
   id: string;
@@ -12,6 +16,7 @@ export interface Booking {
   studentId: string;
   topic: string;
   date: string;
+  student: Student;
   duration: number;
   status: "confirmed" | "pending" | "cancelled" | "completed";
   zoomJoinUrl?: string;

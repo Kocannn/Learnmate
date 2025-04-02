@@ -1,13 +1,6 @@
 "use client";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Calendar,
-  ChevronRight,
-  Clock,
-  Star,
-  Users,
-} from "lucide-react";
+import { ArrowRight, Calendar, ChevronRight, Clock, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 interface Mentor {
   id: string;
@@ -54,25 +48,27 @@ async function getMentors() {
   return res.json();
 }
 
-function generateRecommendations(
+async function generateRecommendations(
   mentors: Mentor[],
   pastBookings: Booking[],
+  currentUserId: string | null = null,
   limit = 3,
-): Mentor[] {
-  // Extract user's interests based on past bookings
+): Promise<Mentor[]> {
+  // Filter out current user dengan type checking
+  const filteredMentors = currentUserId
+    ? mentors.filter((mentor) => mentor.id !== String(currentUserId))
+    : mentors;
+
   const userInterests = new Set<string>();
   const mentorInteractionCount = new Map<string, number>();
   const pastMentorIds = new Set<string>();
 
-  // Analyze past bookings to understand user preferences
   pastBookings.forEach((booking) => {
-    // Track topics user has shown interest in
     if (booking.topic) {
-      const topics = booking.topic.split(/,\s*/).map((t) => t.toLowerCase());
-      topics.forEach((t) => userInterests.add(t));
+      booking.topic
+        .split(/,\s*/)
+        .forEach((t) => userInterests.add(t.toLowerCase()));
     }
-
-    // Track mentors user has worked with
     pastMentorIds.add(booking.mentorId);
     mentorInteractionCount.set(
       booking.mentorId,
@@ -80,47 +76,40 @@ function generateRecommendations(
     );
   });
 
-  // Calculate a score for each mentor based on multiple factors
-  const scoredMentors = mentors.map((mentor) => {
-    // Base score starts with rating (0-5 scale)
+  const scoredMentors = filteredMentors.map((mentor) => {
     let score = mentor.rating || 0;
-
-    // Factor 1: Popularity (normalized review count with diminishing returns)
     score += Math.min(Math.sqrt(mentor.reviewCount) / 2, 2);
 
-    // Factor 2: Content-based filtering - interest matching
-    const interestMatchScore = mentor.interests.reduce((sum, interest) => {
-      return userInterests.has(interest.toLowerCase()) ? sum + 0.75 : sum;
-    }, 0);
-    score += Math.min(interestMatchScore, 3); // Cap at 3 points
+    const interestMatchScore = mentor.interests.reduce(
+      (sum, interest) =>
+        userInterests.has(interest.toLowerCase()) ? sum + 0.75 : sum,
+      0,
+    );
+    score += Math.min(interestMatchScore, 3);
 
-    // Factor 3: Collaborative filtering - previous interactions
     if (pastMentorIds.has(mentor.id)) {
-      // More interactions = stronger preference, with diminishing returns
       const interactionCount = mentorInteractionCount.get(mentor.id) || 0;
       score += Math.min(0.5 * Math.sqrt(interactionCount), 1.5);
     }
 
-    // Factor 4: Penalize extremes (too few or too many reviews)
-    if (mentor.reviewCount < 3) {
-      score -= 0.5; // New mentors with few reviews
-    }
+    if (mentor.reviewCount < 3) score -= 0.5;
 
-    return { mentor, score, interestMatch: interestMatchScore > 0 };
+    return {
+      mentor,
+      score,
+      interestMatch: interestMatchScore > 0,
+    };
   });
 
-  // Sort by score (highest first)
   scoredMentors.sort((a, b) => b.score - a.score);
 
-  // Apply diversity - ensure we have some interest-matched mentors
   const diverseRecommendations = [];
   const interestMatched = scoredMentors.filter((item) => item.interestMatch);
   const otherOptions = scoredMentors.filter((item) => !item.interestMatch);
 
-  // Try to include at least one interest-matched mentor if available
   if (interestMatched.length > 0) {
-    diverseRecommendations.push(interestMatched[0].mentor);
     diverseRecommendations.push(
+      interestMatched[0].mentor,
       ...scoredMentors.slice(0, limit - 1).map((item) => item.mentor),
     );
   } else {
@@ -129,15 +118,18 @@ function generateRecommendations(
     );
   }
 
-  // Return unique mentors up to the limit
-  return [...new Set(diverseRecommendations)].slice(0, limit);
+  return Array.from(new Set(diverseRecommendations)).slice(0, limit);
 }
+
 export default function DashboardPage() {
   // Sample data for recommended mentors
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
   const [recommendedMentors, setRecommendedMentors] = useState<Mentor[]>([]);
+  const { data: user } = useSession();
+  console.log(user)
 
+  const currentUserId = user?.user?.id;
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
   const [pastBookings, setPastBookings] = useState<Booking[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -147,7 +139,11 @@ export default function DashboardPage() {
         const data = await getMentors();
         setMentors(data);
         // Generate recommendations based on past bookings
-        const recommended = generateRecommendations(data, pastBookings);
+        const recommended = await generateRecommendations(
+          data,
+          pastBookings,
+          currentUserId,
+        );
         setRecommendedMentors(recommended);
       } catch (error) {
         console.error("Error loading mentors:", error);
@@ -195,9 +191,10 @@ export default function DashboardPage() {
 
     fetchBookings();
     loadMentors();
-  }, []);
+  }, [currentUserId]);
   // Sample data for upcoming sessions
 
+  console.log(upcomingBookings);
   if (recommendedMentors.length !== 0) {
     console.log(recommendedMentors);
   }
@@ -346,7 +343,9 @@ export default function DashboardPage() {
                   <CardHeader>
                     <CardTitle className="text-base">{session.topic}</CardTitle>
                     <CardDescription>
-                      dengan {session.mentor.name}
+                    {
+                      user.user.isMentor ? `dengan ${session.student.name}` : `dengan ${session.mentor.name}`
+                    }
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

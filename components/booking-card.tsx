@@ -19,9 +19,14 @@ import { StatusBadge } from "./status-badges";
 interface BookingCardProps {
   booking: Booking;
   isPast?: boolean;
+  mentor?: boolean;
 }
 
-export function BookingCard({ booking, isPast = false }: BookingCardProps) {
+export function BookingCard({
+  booking,
+  isPast = false,
+  mentor,
+}: BookingCardProps) {
   // Format date function
   const formatSessionDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -51,6 +56,7 @@ export function BookingCard({ booking, isPast = false }: BookingCardProps) {
     });
   };
 
+  console.log("Booking Card", booking);
   return (
     <Card
       className={`overflow-hidden border-l-4 ${
@@ -73,10 +79,16 @@ export function BookingCard({ booking, isPast = false }: BookingCardProps) {
                 />
               </div>
               <div>
-                <div className="font-semibold">{booking.mentor.name}</div>
-                <div className="text-xs text-muted-foreground">
-                  {booking.mentor.expertise}
+                <div className="font-semibold">
+                  {mentor
+                    ? `${booking.student.name}`
+                    : `${booking.mentor.name}`}
                 </div>
+                {mentor ? null : (
+                  <div className="text-xs text-muted-foreground">
+                    {booking.mentor.expertise}
+                  </div>
+                )}
               </div>
             </div>
           </div>

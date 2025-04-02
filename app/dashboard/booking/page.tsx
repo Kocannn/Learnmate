@@ -10,8 +10,10 @@ import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { PaginationControls } from "@/components/pagination-controls";
 import { SearchFilter } from "@/components/search-filter";
 import type { Booking } from "@/app/dashboard/booking/types";
+import { UserProvider, useUser } from "@/context/UserContext";
 
-export default function BookingsPage() {
+export function BookingsPageContent() {
+  const { user } = useUser();
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
   const [pastBookings, setPastBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +101,7 @@ export default function BookingsPage() {
             Jadwal Sesi
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground">
-            Kelola sesi mentoring yang telah Anda jadwalkan
+            Sesi mentoring yang telah di jadwalkan
           </p>
         </div>
 
@@ -141,6 +143,7 @@ export default function BookingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {currentItems.map((booking) => (
                     <BookingCard
+                      mentor={user?.isMentor}
                       key={booking.id}
                       booking={booking}
                       isPast={false}
@@ -198,5 +201,12 @@ export default function BookingsPage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+export default function BookingsPage() {
+  return (
+    <UserProvider>
+      <BookingsPageContent />
+    </UserProvider>
   );
 }
