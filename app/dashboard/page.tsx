@@ -29,6 +29,7 @@ interface Booking {
   mentor: Mentor;
   mentorId: string;
   studentId: string;
+  student: any;
   topic: string;
   date: string;
   time: string; // Added time field for when the zoom meeting starts
@@ -222,77 +223,77 @@ export default function DashboardPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {loading
             ? // Skeleton loaders while content is loading
-              Array(3)
-                .fill(0)
-                .map((_, index) => (
-                  <Card key={`skeleton-${index}`} className="overflow-hidden">
-                    <CardHeader className="p-0">
-                      <div className="bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700 h-12 animate-pulse" />
-                    </CardHeader>
-                    <CardContent className="p-6 pt-0">
-                      <div className="flex flex-col items-center -mt-8">
-                        <div className="rounded-full border-4 border-white dark:border-slate-800 h-16 w-16 bg-gray-300 dark:bg-gray-700 animate-pulse" />
-                        <div className="mt-2 h-4 w-32 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
-                        <div className="flex items-center gap-1 mt-1">
-                          <div className="h-3 w-20 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                          <span className="text-xs">•</span>
-                          <div className="flex items-center">
-                            <div className="h-3 w-10 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                          </div>
-                        </div>
-                        <div className="text-sm text-center mt-3 space-y-2">
-                          <div className="h-3 w-full bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                          <div className="h-3 w-5/6 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-center border-t p-4">
-                      <div className="h-9 w-24 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
-                    </CardFooter>
-                  </Card>
-                ))
-            : recommendedMentors.map((mentor) => (
-                <Card key={mentor.id} className="overflow-hidden">
+            Array(3)
+              .fill(0)
+              .map((_, index) => (
+                <Card key={`skeleton-${index}`} className="overflow-hidden">
                   <CardHeader className="p-0">
-                    <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-12" />
+                    <div className="bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700 h-12 animate-pulse" />
                   </CardHeader>
                   <CardContent className="p-6 pt-0">
                     <div className="flex flex-col items-center -mt-8">
-                      <img
-                        src={mentor.profileImage || "/placeholder.svg"}
-                        alt={mentor.name}
-                        className="rounded-full border-4 border-white dark:border-slate-800 h-16 w-16 bg-white"
-                      />
-                      <h3 className="mt-2 font-semibold text-lg">
-                        {mentor.name}
-                      </h3>
+                      <div className="rounded-full border-4 border-white dark:border-slate-800 h-16 w-16 bg-gray-300 dark:bg-gray-700 animate-pulse" />
+                      <div className="mt-2 h-4 w-32 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
                       <div className="flex items-center gap-1 mt-1">
-                        <span className="text-sm text-muted-foreground">
-                          {mentor.interests[0]}
-                        </span>
+                        <div className="h-3 w-20 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
                         <span className="text-xs">•</span>
                         <div className="flex items-center">
-                          <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                          <span className="text-sm ml-1">{mentor.rating}</span>
-                          <span className="text-xs ml-1">
-                            ({mentor.reviewCount})
-                          </span>
+                          <div className="h-3 w-10 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
                         </div>
                       </div>
-                      <p className="text-sm text-center text-muted-foreground mt-3">
-                        {mentor.bio}
-                      </p>
+                      <div className="text-sm text-center mt-3 space-y-2">
+                        <div className="h-3 w-full bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                        <div className="h-3 w-5/6 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                      </div>
                     </div>
                   </CardContent>
                   <CardFooter className="flex justify-center border-t p-4">
-                    <Button asChild>
-                      <Link href={`/dashboard/mentors/${mentor.id}`}>
-                        Lihat Profil
-                      </Link>
-                    </Button>
+                    <div className="h-9 w-24 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
                   </CardFooter>
                 </Card>
-              ))}
+              ))
+            : recommendedMentors.map((mentor) => (
+              <Card key={mentor.id} className="overflow-hidden">
+                <CardHeader className="p-0">
+                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-12" />
+                </CardHeader>
+                <CardContent className="p-6 pt-0">
+                  <div className="flex flex-col items-center -mt-8">
+                    <img
+                      src={mentor.profileImage || "/placeholder.svg"}
+                      alt={mentor.name}
+                      className="rounded-full border-4 border-white dark:border-slate-800 h-16 w-16 bg-white"
+                    />
+                    <h3 className="mt-2 font-semibold text-lg">
+                      {mentor.name}
+                    </h3>
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-sm text-muted-foreground">
+                        {mentor.interests[0]}
+                      </span>
+                      <span className="text-xs">•</span>
+                      <div className="flex items-center">
+                        <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                        <span className="text-sm ml-1">{mentor.rating}</span>
+                        <span className="text-xs ml-1">
+                          ({mentor.reviewCount})
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-center text-muted-foreground mt-3">
+                      {mentor.bio}
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-center border-t p-4">
+                  <Button asChild>
+                    <Link href={`/dashboard/mentors/${mentor.id}`}>
+                      Lihat Profil
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
         </div>
       </div>
 
@@ -310,68 +311,68 @@ export default function DashboardPage() {
         <div className="grid gap-4 md:grid-cols-2">
           {loading
             ? Array(2)
-                .fill(0)
-                .map((_, index) => (
-                  <Card key={`skeleton-${index}`} className="overflow-hidden">
-                    <CardHeader className="p-0">
-                      <div className="bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700 h-12 animate-pulse" />
-                    </CardHeader>
-                    <CardContent className="p-6 pt-0">
-                      <div className="flex flex-col items-center -mt-8">
-                        <div className="rounded-full border-4 border-white dark:border-slate-800 h-16 w-16 bg-gray-300 dark:bg-gray-700 animate-pulse" />
-                        <div className="mt-2 h-4 w-32 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
-                        <div className="flex items-center gap-1 mt-1">
-                          <div className="h-3 w-20 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                          <span className="text-xs">•</span>
-                          <div className="flex items-center">
-                            <div className="h-3 w-10 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                          </div>
-                        </div>
-                        <div className="text-sm text-center mt-3 space-y-2">
-                          <div className="h-3 w-full bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                          <div className="h-3 w-5/6 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-center border-t p-4">
-                      <div className="h-9 w-24 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
-                    </CardFooter>
-                  </Card>
-                ))
-            : upcomingSessions.map((session) => (
-                <Card key={session.id}>
-                  <CardHeader>
-                    <CardTitle className="text-base">{session.topic}</CardTitle>
-                    <CardDescription>
-                    {
-                      user.user.isMentor ? `dengan ${session.student.name}` : `dengan ${session.mentor.name}`
-                    }
-                    </CardDescription>
+              .fill(0)
+              .map((_, index) => (
+                <Card key={`skeleton-${index}`} className="overflow-hidden">
+                  <CardHeader className="p-0">
+                    <div className="bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700 h-12 animate-pulse" />
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm">
-                          {new Date(session.date).toLocaleDateString()}
-                        </span>
+                  <CardContent className="p-6 pt-0">
+                    <div className="flex flex-col items-center -mt-8">
+                      <div className="rounded-full border-4 border-white dark:border-slate-800 h-16 w-16 bg-gray-300 dark:bg-gray-700 animate-pulse" />
+                      <div className="mt-2 h-4 w-32 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
+                      <div className="flex items-center gap-1 mt-1">
+                        <div className="h-3 w-20 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                        <span className="text-xs">•</span>
+                        <div className="flex items-center">
+                          <div className="h-3 w-10 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                        </div>
                       </div>
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm">{session.time}</span>
+                      <div className="text-sm text-center mt-3 space-y-2">
+                        <div className="h-3 w-full bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                        <div className="h-3 w-5/6 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
                       </div>
                     </div>
                   </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Button variant="outline" size="sm">
-                      Reschedule
-                    </Button>
-                    <Link href={`/dashboard/meetings/${session.id}`}>
-                      <Button>Join Zoom</Button>
-                    </Link>
+                  <CardFooter className="flex justify-center border-t p-4">
+                    <div className="h-9 w-24 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
                   </CardFooter>
                 </Card>
-              ))}
+              ))
+            : upcomingSessions.map((session) => (
+              <Card key={session.id}>
+                <CardHeader>
+                  <CardTitle className="text-base">{session.topic}</CardTitle>
+                  <CardDescription>
+                    {
+                      user?.user.isMentor ? `dengan ${session.student.name}` : `dengan ${session.mentor.name}`
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="text-sm">
+                        {new Date(session.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="text-sm">{session.time}</span>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button variant="outline" size="sm">
+                    Reschedule
+                  </Button>
+                  <Link href={`/dashboard/meetings/${session.id}`}>
+                    <Button>Join Zoom</Button>
+                  </Link>
+                </CardFooter>
+              </Card>
+            ))}
           {upcomingSessions.length === 0 && !loading && (
             <Card className="col-span-2">
               <CardContent className="flex flex-col items-center justify-center p-6">
