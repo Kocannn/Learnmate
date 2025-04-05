@@ -20,6 +20,12 @@ export async function GET() {
         OR: [{ mentorId: userId }, { studentId: userId }],
       },
       include: {
+        student: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         mentor: {
           select: {
             id: true,
@@ -35,7 +41,6 @@ export async function GET() {
       },
     });
 
-    // Format bookings to match the expected structure
     const formattedBookings = bookings.map((booking) => ({
       id: booking.id,
       mentorId: booking.mentorId,
@@ -50,6 +55,10 @@ export async function GET() {
       notes: booking.notes,
       time: booking.time,
       reviewed: false, // This would come from a review table in a real system
+      student: {
+        id: booking.student.id,
+        name: booking.student.name,
+      },
       mentor: {
         id: booking.mentor.id,
         name: booking.mentor.name,
